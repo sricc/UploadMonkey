@@ -1,0 +1,42 @@
+<style type="text/css">
+	.hide {
+		display : none;
+</style>
+
+<div id="html"></div>
+
+<!-- MARKDOWN -->
+<div id="markdown" class="hide">
+
+Upload
+=================
+
+---
+
+
+Options
+-----------------
+
+* **fileLimit**		- the number of files that can be uploaded
+* **auto** 			- if auto is true (default), the file will be uploaded as soon as it's added
+* **debug** 			- if debug is true (default), then debug info will be logged to the console
+* **dragDrop** 		- if true (default), then drag and drop is enabled
+* **mimeType** 		- the mime-type of the files being uploaded (ex. 'image')
+* **allowedExts** 	- defaults to null, meaning there is no extension filter (['jpg', 'jpeg', 'png'])
+* **dropZoneText** 	- 'Drop files here...'
+* **sizeLimit**		- the size limit of the files to upload, 0 is default and means unlimited
+* **method** 			- the method to use (i.e. 'post' or 'put')
+* **action** 			- the action to take, 'upload.php' is default 
+
+
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script src="js/pagedown/Markdown.Converter.js"></script> 
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		var converter = new Markdown.Converter();
+		$('#html').html(converter.makeHtml($('#markdown').html()));
+	});
+</script>
