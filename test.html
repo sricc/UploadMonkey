@@ -9,15 +9,14 @@
 
 <div id="dummy"></div>
 
-<div id="dropzone" class="uploadable">
-
-</div>
+<div id="dropzone" class="uploadable"></div>
 
 <input type="file" id="files" name="files[]" />
-<output id="list"></output>
 
 <a href='#' id='send'>Upload</a>
 <a href='#' id='clear'>Clear Queue</a>
+
+<output id="list"></output>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
 <script src="js/jquery.upload.js"></script> 
@@ -25,10 +24,11 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		//$('#upload').upload();
+		/*
 		var upload = $('#files').Upload({
-			debug 			: true,
+			debug 			: false,
 			auto 			: true,
-			multiple 		: false,
+			multiple 		: true,
 			method 			: 'post',
 			dragDrop 		: true,
 			dropZone 		: $('#dropzone'),
@@ -40,9 +40,30 @@
 			action 			: 'http://localhost/upload/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('test onSuccess');
+				
+				console.log(data.url);
+				$('#dropzone').html('<img src="http://localhost/../../..' + data.url + '" />');
 			}
 		});
-
+		*/
+		
+		var upload = $('#dropzone').Upload({
+			debug 			: false,
+			auto 			: true,
+			multiple 		: true,
+			method 			: 'put',
+			dragDrop 		: true,
+			dropZoneText 	: 'Drop files here...',
+			queue 			: $('#list'),
+			showQueue  		: true,
+			successStatus	: [200,201],
+			action 			: 'http://localhost/upload/upload.php',
+			onSuccess 		: function(data, textStatus, jqXHR) {
+				console.log('test onSuccess');
+				
+				console.log(data.url);
+			}
+		});
 
 		$('#send').live('click', function(e) {
 			console.log('clear');

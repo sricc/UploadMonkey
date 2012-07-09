@@ -33,9 +33,11 @@
 			mimeType		 : 'image',
 			allowedExts 	 : null,
 			dropZone 		 : null,
-			dropZoneText	 : 'drop files here...',
+			dropZoneText	 : 'Drop files here...',
+			inputFile 		 : null,
 			inputText		 : 'Choose File',
 			dropZoneTextSize : '20px',
+			dzDragOverColor  : '#99CCFF',
 			sizeLimit		 : 0,
 			method 			 : 'post',
 			action 			 : 'upload.php',
@@ -109,42 +111,6 @@
 				? self.options.queue.show()
 				: self.options.queue.hide();
 		}	
-
-		/**
-		 * Drag and drop
-		 */
-		var _initDragDrop = function() {
-			var dropZone = self.options.dropZone;
-
-			// Build dropzone
-			dropZone.append('<span></span>')
-				.css('text-align', 'center')
-				.css('display', 'table-cell')
-				.css('vertical-align', 'middle');
-			dropZone.find('span')
-				.html(self.options.dropZoneText || 'drop files here...')
-				.css('color','grey')
-				.css('font-size', self.options.dropZoneTextSize)
-				.css('top', '50%');
-
-			// Add events
-			var xhr = new XMLHttpRequest();
-			if (xhr.upload) {  
-		        dropZone.live("dragover", 	_drapOver);  
-		        dropZone.live("dragleave", 	_drapLeave);  
-		        dropZone.live("drop", 		_drop);
-			};
-		};
-
-		/**
-		 * Ignore the drag events
-		 */
-		var _ignoreDrag = function(e) {
-			e.stopPropagation();  
-		    e.preventDefault();  
-
-		    return false; // Needed for IE
-		};
 		
 		/**
 		 * Drag leave
@@ -152,6 +118,7 @@
 		var _drapLeave = function(e) {
 			_ignoreDrag(e);
 			
+			// Change background color back to white
 			$(this).css('background-color', '#FFF');
 		}
 		
@@ -161,13 +128,17 @@
 		var _drapOver = function(e) {
 			_ignoreDrag(e);
 			
-			$(this).css('background-color', '#99CCFF');
+			// Change background color 
+			$(this).css('background-color', self.options.dzDragOverColor);
 		}
 
 		/**
 		 * Drop event
 		 */
 		var _drop = function(e) {
+			
+			// Change background color back to white
+			$(this).css('background-color', '#FFF');
 			
 			if (self.options.debug)
 				console.log('dropped');
@@ -184,12 +155,23 @@
 			}
 
 			// Build the queue
-		   	_buildQueue();
+		   	if (self.options.queue)
+			   	_buildQueue();
 
 			if (self.options.auto)
 				self.send();
 
 			return false;
+		};
+		
+		/**
+		 * Ignore the drag events
+		 */
+		var _ignoreDrag = function(e) {
+			e.stopPropagation();  
+		    e.preventDefault();  
+
+		    return false; // Needed for IE
 		};
 
 		/**
@@ -202,21 +184,50 @@
 				 ? self.element.attr('multiple', 'multiple')
 				 : self.element.removeAttr('multiple');
 
-			_initForm();
+			if (self.options.inputFile || self.element.is('input')) 
+				_initForm();
 
-			if (self.options.dragDrop)
+			if (self.options.dragDrop || self.element.is('div'))
 				_initDragDrop();	
+		};
+		
+		/**
+		 * Drag and drop
+		 */
+		var _initDragDrop = function() {
+			var dropZone = self.options.dropZone || self.element;
+
+			// Build dropzone
+			dropZone.append('<span></span>')
+				.css('text-align', 'center')
+				.css('display', 'table-cell')
+				.css('vertical-align', 'middle');
+			dropZone.find('span')
+				.html(self.options.dropZoneText)
+				.css('color','grey')
+				.css('top', '50%');
+
+
+			// Add events
+			var xhr = new XMLHttpRequest();
+			if (xhr.upload) {  
+		        dropZone.live("dragover", 	_drapOver);  
+		        dropZone.live("dragleave", 	_drapLeave);  
+		        dropZone.live("drop", 		_drop);
+			};
 		};
 		
 		/**
 		 * Initialize the form element (i.e. input)
 		 */
 		var _initForm = function() {
+			var inputFile = self.options.inputFile || self.element
+			
 			// Bind on change event to the element if it's a form input
-			if (self.element.is('input')) {
-				self.element.text(self.options.inputText);
+			if (inputFile.is('input')) {
+				inputFile.text(self.options.inputText);
 				
-				self.element.live('change', function(e) {
+				inputFile.live('change', function(e) {
 				    self.files = e.target.files; 
 
 				    // Check if files selected where over the limit or is not set to zero (unlimited)
@@ -227,7 +238,8 @@
 	    			}
 
 	    			// Build the queue
-				   	_buildQueue();
+				   	if (self.options.queue)
+						_buildQueue();
 
 				    // If auto is set, send the request immediately
 				    if (self.options.auto)
@@ -267,6 +279,15 @@
 		self.queue = [];
 		self.options.queue.html('');
 	};
+	
+	/**
+	 * Clears the files
+	 */
+	Upload.prototype.clearFiles = function() {
+		var self = this;
+
+		self.files = [];
+	};
 
 	/**
 	 * Send the request
@@ -281,7 +302,9 @@
 
 		// Build the formData
 		var formData = new FormData();
-		formData.append('file', self.files[0]);
+		$.each(self.files, function(i, file) {
+			formData.append('file-'+i, file);
+		});
 
 		// Send the AJAX request
 		$.ajax({
@@ -308,9 +331,13 @@
 				
 				if (self.options.debug)
 					console.log(data);
+					
+				self.clearFiles();
 		    },
 		    error 		: function(jqXHR, textStatus, errorThrown) {
 		    	self.options.onError(jqXHR, textStatus, errorThrown);
+				
+				self.clearFiles();
 		    }
 		});
 	}
