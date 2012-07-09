@@ -1,4 +1,15 @@
 (function($, window, undefined) {
+	
+	/**
+	 * Constructor (expose Upload)
+	 *
+	 * @param object the options object
+	 * @return object the plugin object
+	 */
+	$.fn.Upload = function(options) {
+		return new Upload(this, options);
+	};
+	
 	/**
 	 * Upload object 
 	 *
@@ -23,10 +34,11 @@
 			allowedExts 	 : null,
 			dropZone 		 : null,
 			dropZoneText	 : 'drop files here...',
+			inputText		 : 'Choose File',
 			dropZoneTextSize : '20px',
 			sizeLimit		 : 0,
 			method 			 : 'post',
-			action 			 : 'this.php',
+			action 			 : 'upload.php',
 			successStatus 	 : [200,201],
 			onSuccess 		 : function() {},
 			onError 		 : function() {},
@@ -70,7 +82,10 @@
 	 	 * @param array the array of files that were selected
 	 	 */
 		var _buildQueue = function() {
-			console.log('in _buildQueue');
+			
+			if (self.options.debug)
+				console.log('in _buildQueue');
+	
 			var output = [];
 
 		   	// loop through the array and build the html
@@ -95,9 +110,13 @@
 				: self.options.queue.hide();
 		}	
 
-		var _dragDrop = function() {
+		/**
+		 * Drag and drop
+		 */
+		var _initDragDrop = function() {
 			var dropZone = self.options.dropZone;
 
+			// Build dropzone
 			dropZone.append('<span></span>')
 				.css('text-align', 'center')
 				.css('display', 'table-cell')
@@ -106,37 +125,66 @@
 				.html(self.options.dropZoneText || 'drop files here...')
 				.css('color','grey')
 				.css('font-size', self.options.dropZoneTextSize)
-				.css('top', '50%')
+				.css('top', '50%');
 
+			// Add events
 			var xhr = new XMLHttpRequest();
 			if (xhr.upload) {  
-		        dropZone.live("dragover", 	_ignoreDrag);  
-		        dropZone.live("dragleave", 	_ignoreDrag);  
+		        dropZone.live("dragover", 	_drapOver);  
+		        dropZone.live("dragleave", 	_drapLeave);  
 		        dropZone.live("drop", 		_drop);
 			};
 		};
 
+		/**
+		 * Ignore the drag events
+		 */
 		var _ignoreDrag = function(e) {
 			e.stopPropagation();  
 		    e.preventDefault();  
 
 		    return false; // Needed for IE
 		};
+		
+		/**
+		 * Drag leave
+		 */
+		var _drapLeave = function(e) {
+			_ignoreDrag(e);
+			
+			$(this).css('background-color', '#FFF');
+		}
+		
+		/**
+		 * Drag over
+		 */
+		var _drapOver = function(e) {
+			_ignoreDrag(e);
+			
+			$(this).css('background-color', '#99CCFF');
+		}
 
+		/**
+		 * Drop event
+		 */
 		var _drop = function(e) {
+			
+			if (self.options.debug)
+				console.log('dropped');
+	
 			_ignoreDrag(e);
 
 			var dropZone = self.options.dropZone;
-
-			console.log('dropped');
-			
-			var dt = e.originalEvent.dataTransfer;
-			var files = dt.files;
+			var dt 		 = e.originalEvent.dataTransfer;
+			var files 	 = dt.files;
 
 			if(dt.files.length > 0){
 				var file = dt.files[0];
 				self.files.push(file);
 			}
+
+			// Build the queue
+		   	_buildQueue();
 
 			if (self.options.auto)
 				self.send();
@@ -154,8 +202,20 @@
 				 ? self.element.attr('multiple', 'multiple')
 				 : self.element.removeAttr('multiple');
 
+			_initForm();
+
+			if (self.options.dragDrop)
+				_initDragDrop();	
+		};
+		
+		/**
+		 * Initialize the form element (i.e. input)
+		 */
+		var _initForm = function() {
 			// Bind on change event to the element if it's a form input
 			if (self.element.is('input')) {
+				self.element.text(self.options.inputText);
+				
 				self.element.live('change', function(e) {
 				    self.files = e.target.files; 
 
@@ -173,11 +233,8 @@
 				    if (self.options.auto)
 						self.send();
 				});
-			}
-
-			if (self.options.dragDrop)
-				_dragDrop();	
-		};
+			}	
+		}
 
 		/**
 		 * Override xhr in $.ajax to attah an onProgress event listener
@@ -185,7 +242,9 @@
 		 * @return object the xhr object
 	 	 */
 		var uploadXHR = function() {
-			console.log('in uploadXHR');
+			
+			if (self.options.debug)
+				console.log('in uploadXHR');
 
 			var xhr = $.ajaxSettings.xhr();
 
@@ -216,7 +275,9 @@
 	 */
 	Upload.prototype.send = function() {
 		var self = this;
-		console.log('in send');
+		
+		if (self.options.debug)
+			console.log('in send');
 
 		// Build the formData
 		var formData = new FormData();
@@ -226,12 +287,12 @@
 		$.ajax({
 		    url 		: self.options.action,
 		    type 		: self.options.method.toUpperCase(),
-		    xhr 		: Upload.uploadXHR,
+		    //xhr 		: Upload.uploadXHR,
 		    data 		: formData,
 		    cache 		: false,
 		    contentType : false,
 		    processData : false,
-		    beforeSend : function(xhr) {
+		    beforeSend  : function(xhr) {
 		    	self.options.beforeSend(xhr);
 		    	var file = self.files[0];
 
@@ -244,20 +305,13 @@
 		    },
 		    success 	: function(data, textStatus, jqXHR) {
 		    	self.options.onSuccess(data, textStatus, jqXHR);
+				
+				if (self.options.debug)
+					console.log(data);
 		    },
 		    error 		: function(jqXHR, textStatus, errorThrown) {
 		    	self.options.onError(jqXHR, textStatus, errorThrown);
 		    }
 		});
 	}
-
-	/**
-	 * Constructor (expose Upload)
-	 *
-	 * @param object the options object
-	 * @return object the plugin object
-	 */
-	$.fn.Upload = function(options) {
-		return new Upload(this, options);
-	};
 })(jQuery, window);

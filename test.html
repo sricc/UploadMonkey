@@ -3,8 +3,7 @@
 		border 		 : 3px solid #000;
 		border-style : dashed;	
 		width		 : 250px;
-		height 		 : 150px;
-		margin 		 : 50px; 	
+		height 		 : 150px; 	
 	}
 </style>
 
@@ -27,19 +26,20 @@
 	$(document).ready(function() {
 		//$('#upload').upload();
 		var upload = $('#files').Upload({
-			debug 			: false,
+			debug 			: true,
 			auto 			: true,
 			multiple 		: false,
-			method 			: 'put',
+			method 			: 'post',
 			dragDrop 		: true,
 			dropZone 		: $('#dropzone'),
-			dropZoneText 	: 'Please drop files here...',
+			dropZoneText 	: 'Drop files here...',
+			inputText		: 'Select Files',
 			queue 			: $('#list'),
 			showQueue  		: true,
 			successStatus	: [200,201],
 			action 			: 'http://localhost/upload/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
-
+				console.log('test onSuccess');
 			}
 		});
 
