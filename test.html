@@ -13,7 +13,7 @@
 
 <input type="file" id="files" name="files[]" />
 
-<a href='#' id='send'>Upload</a>
+<a href='#' id='upload'>Upload</a>
 <a href='#' id='clear'>Clear Queue</a>
 
 <output id="list"></output>
@@ -36,7 +36,6 @@
 			inputText		: 'Select Files',
 			queue 			: $('#list'),
 			showQueue  		: true,
-			successStatus	: [200,201],
 			action 			: 'http://localhost/upload/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('test onSuccess');
@@ -48,7 +47,7 @@
 		*/
 		
 		var upload = $('#dropzone').Upload({
-			debug 			: false,
+			debug 			: true,
 			auto 			: true,
 			multiple 		: true,
 			method 			: 'put',
@@ -56,17 +55,16 @@
 			dropZoneText 	: 'Drop files here...',
 			queue 			: $('#list'),
 			showQueue  		: true,
-			successStatus	: [200,201],
 			action 			: 'http://localhost/upload/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('test onSuccess');
 				
-				console.log(data);
+				//console.log(data);
 			}
 		});
 
-		$('#send').live('click', function(e) {
-			console.log('clear');
+		$('#upload').live('click', function(e) {
+			console.log('send');
 
 			e.preventDefault();
 

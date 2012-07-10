@@ -23,7 +23,7 @@
 		/**
 		 * The default options 
 		 */
-		var defaultOptions = {
+		var _defaultOptions = {
 			multiple 		 : false,
 			queue			 : false,
 			showQueue 		 : true,
@@ -41,7 +41,6 @@
 			sizeLimit		 : 0,
 			method 			 : 'post',
 			action 			 : 'upload.php',
-			successStatus 	 : [200,201],
 			onSuccess 		 : function() {},
 			onError 		 : function() {},
 			beforeSend 		 : function() {}
@@ -67,13 +66,13 @@
 		 * The files to send
 		 */
 		self.files = [];
+		/**
+		 * Whether or not the browser supports HTML5 File API
+		 */
+		self.supportsFileUpload = true;
 
 		// Set the options
-		self.options = $.extend(defaultOptions, opts || {});
-
-		// Output debug info
-		if (self.options.debug)
-			console.log(self.options);
+		self.options = $.extend(_defaultOptions, opts || {});
 
 		// Set the element that this plugin is bound to
   		self.element = element;
@@ -85,8 +84,8 @@
 	 	 */
 		var _buildQueue = function() {
 			
-			if (self.options.debug)
-				console.log('in _buildQueue');
+			// Output debug info
+			_debug('in _buildQueue');
 	
 			var output = [];
 
@@ -110,7 +109,17 @@
 			self.options.showQueue
 				? self.options.queue.show()
 				: self.options.queue.hide();
-		}	
+		};	
+		
+		/**
+		 * Output debug info
+		 *
+		 * @param mixed output whatever you want to output
+		 */
+		var _debug = function(output) {
+			if (self.options.debug)
+				console.log(output);
+		};
 		
 		/**
 		 * Drag leave
@@ -140,8 +149,8 @@
 			// Change background color back to white
 			$(this).css('background-color', '#FFF');
 			
-			if (self.options.debug)
-				console.log('dropped');
+			// Output debug info
+			_debug('dropped');
 	
 			_ignoreDrag(e);
 
@@ -179,10 +188,16 @@
 		 */
 		var _init = function() {
 
+			// Output debug info
+			_debug(self.options);
+			
 			// Check if multiple is enabled
 			self.options.multiple
 				 ? self.element.attr('multiple', 'multiple')
 				 : self.element.removeAttr('multiple');
+
+			if (! _checkFileUpload() )
+				self.supportsFileUpload = false;
 
 			if (self.options.inputFile || self.element.is('input')) 
 				_initForm();
@@ -248,15 +263,13 @@
 			}	
 		}
 
-		var _supportsFileUpload = function() {
-			return (typeof(window.FileReader) === 'undefined') 
+		/**
+		 * Check if the browser supports FormData, part of XHR Level 2
+		 */
+		var _checkFileUpload = function() {
+			return (typeof(window.FormData) === 'undefined') 
 						? false
 						: true;
-		};
-
-		var _sendIframe = function() {
-			console.log('in sendIframe');
-
 		};
 
 		/**
@@ -266,8 +279,8 @@
 	 	 */
 		var _uploadXHR = function() {
 			
-			if (self.options.debug)
-				console.log('in uploadXHR');
+			// Output debug info
+			_debug('in uploadXHR');
 
 			var xhr = $.ajaxSettings.xhr();
 
@@ -277,85 +290,102 @@
 	        }
 	        return xhr;
 	    };
-
-		_init();	
-	};
-
-	/**
-	 * Clears the queue
-	 */
-	Upload.prototype.clearQueue = function() {
-		var self = this;
-
-		self.queue = [];
-		self.options.queue.html('');
-	};
-	
-	/**
-	 * Clears the files
-	 */
-	Upload.prototype.clearFiles = function() {
-		var self = this;
-
-		self.files = [];
-	};
-
-	/**
-	 * Send the request
-	 *
-	 * @param array an array of the files to upload
-	 */
-	Upload.prototype.send = function() {
-		var self = this;
 		
-		if (self.options.debug)
-			console.log('in send');
-
-		// Check if browser supports HTML5 FILE API, if not use iFrame hack
-		if (! _supportsFileUpload() ) { 
-			_sendIframe();
-			return;
-		}
-
-		// Build the formData
-		var formData = new FormData();
-		$.each(self.files, function(i, file) {
-			formData.append('file-'+i, file);
-		});
-
-		// Send the AJAX request
-		$.ajax({
-		    url 		: self.options.action,
-		    type 		: self.options.method.toUpperCase(),
-		    //xhr 		: Upload.uploadXHR,
-		    data 		: formData,
-		    cache 		: false,
-		    contentType : false,
-		    processData : false,
-		    beforeSend  : function(xhr) {
-		    	self.options.beforeSend(xhr);
-		    	var file = self.files[0];
-
-		    	if (self.options.method.toUpperCase() == 'PUT') {
-		        	xhr.setRequestHeader('X-File-Name', file.name);
-		        	xhr.setRequestHeader('X-File-Type', file.type);
-                    xhr.setRequestHeader('X-File-Size', file.size);
-		        	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-		        }	
-		    },
-		    success 	: function(data, textStatus, jqXHR) {
-		    	self.options.onSuccess(data, textStatus, jqXHR);
-				
-				if (self.options.debug)
-					console.log(data);
+		/**
+		 * Send a file via old iFrame hack since XHR Level 2 is not supported 
+		 */
+		var _sendFileIframe = function() {
+			_debug('in sendFileIframe');
+		};
+		
+		/**
+		 * Send a file via XHR Level 2 
+		 */
+		var _sendFileAjax = function() {
 					
-				self.clearFiles();
-		    },
-		    error 		: function(jqXHR, textStatus, errorThrown) {
-		    	self.options.onError(jqXHR, textStatus, errorThrown);
-				
-				self.clearFiles();
-		    }
-		});
-	}
+			// Output debug info
+			_debug('in _sendFileAjax');
+	
+			// Build the formData
+			var formData = new FormData();
+			$.each(self.files, function(i, file) {
+				formData.append('file-'+i, file);
+			});
+	
+			// Send the AJAX request
+			$.ajax({
+				url 		: self.options.action,
+				type 		: self.options.method.toUpperCase(),
+				//xhr 		: Upload.uploadXHR,
+				data 		: formData,
+				cache 		: false,
+				contentType : false,
+				processData : false,
+				beforeSend  : function(xhr) {
+					self.options.beforeSend(xhr);
+					var file = self.files[0];
+	
+					if (!file)
+						_debug('No files in queue');
+	
+					if (file) {
+						if (self.options.method.toUpperCase() == 'PUT') {
+							xhr.setRequestHeader('X-File-Name', file.name);
+							xhr.setRequestHeader('X-File-Type', file.type);
+							xhr.setRequestHeader('X-File-Size', file.size);
+							xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+						}	
+					} 
+				},
+				success 	: function(data, textStatus, jqXHR) {
+					self.options.onSuccess(data, textStatus, jqXHR);
+					
+					if (self.options.debug)
+						console.log(data);
+						
+					self.clearFiles();
+				},
+				error 		: function(jqXHR, textStatus, errorThrown) {
+					self.options.onError(jqXHR, textStatus, errorThrown);
+					
+					self.clearFiles();
+				}
+			});
+		};
+	
+		/**
+		 * Clears the queue
+		 */
+		self.clearQueue = function() {
+			var self = this;
+	
+			self.queue = [];
+			self.options.queue.html('');
+		};
+		
+		/**
+		 * Clears the files
+		 */
+		self.clearFiles = function() {
+			var self = this;
+	
+			self.files = [];
+		};
+		
+		/**
+		 * Send the request
+		 *
+		 * @param array an array of the files to upload
+		 */
+		self.send = function() {
+			(self.supportsFileUpload)
+				? _sendFileAjax()
+				: _sendFileIframe();
+		}	
+		
+		
+		// Initialize
+		_init();
+		
+	}; // End Upload Class
 })(jQuery, window);
