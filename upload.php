@@ -21,7 +21,7 @@ function sendAjaxResponse($code, $model) {
 	header('Content-type: application/json');
 	
 	echo json_encode($model);
-	app()->end();
+	exit;
 }
 
 /**
@@ -44,6 +44,8 @@ if (empty($_FILES)) {
 		
 		$path = '/tmp/images/' . uniqid() . $ext;
 	
+		echo $data; exit;	
+
 		file_put_contents($path, $data);
 	
 		sendAjaxResponse(201, array('url'=>$path)); 

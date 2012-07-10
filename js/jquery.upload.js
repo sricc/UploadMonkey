@@ -248,12 +248,23 @@
 			}	
 		}
 
+		var _supportsFileUpload = function() {
+			return (typeof(window.FileReader) === 'undefined') 
+						? false
+						: true;
+		};
+
+		var _sendIframe = function() {
+			console.log('in sendIframe');
+
+		};
+
 		/**
 		 * Override xhr in $.ajax to attah an onProgress event listener
 		 *
 		 * @return object the xhr object
 	 	 */
-		var uploadXHR = function() {
+		var _uploadXHR = function() {
 			
 			if (self.options.debug)
 				console.log('in uploadXHR');
@@ -265,7 +276,7 @@
 	            	xhr.self.addEventListener('progress', self.options.onProgress, false);
 	        }
 	        return xhr;
-	    }
+	    };
 
 		_init();	
 	};
@@ -299,6 +310,12 @@
 		
 		if (self.options.debug)
 			console.log('in send');
+
+		// Check if browser supports HTML5 FILE API, if not use iFrame hack
+		if (! _supportsFileUpload() ) { 
+			_sendIframe();
+			return;
+		}
 
 		// Build the formData
 		var formData = new FormData();
