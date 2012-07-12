@@ -18,7 +18,7 @@ function sendAjaxResponse($code, $model) {
 	);
 	
 	header('HTTP/1.1 ' . $code . ' ' . $message[$code]);
-	header('Content-type: application/json');
+	header('Content-type: text/html');
 	
 	echo json_encode($model);
 	exit;
@@ -34,6 +34,14 @@ function getFileExt($path) {
 				: NULL;
 }
 
+//sendAjaxResponse(500, 'Error');
+
+$tmp_dir = '/tmp/images';
+
+if(!file_exists($tmp_dir)) 
+	mkdir($tmp_dir, 0777, true);
+
+
 if (empty($_FILES)) {
 	$data = file_get_contents('php://input');
 
@@ -42,7 +50,7 @@ if (empty($_FILES)) {
 	if ($filename) {
 		$ext = getFileExt($filename); 
 		
-		$path = '/tmp/images/' . uniqid() . $ext;
+		$path = $tmp_dir . uniqid() . $ext;
 	
 		echo $data; exit;	
 
@@ -57,12 +65,12 @@ if (empty($_FILES)) {
 	//print_r($_FILES); exit;
 
 	foreach ($_FILES as $key=>$value) {
-		$path = '/tmp/images/' . uniqid() . '.png';
+		$path = $tmp_dir . uniqid() . '.png';
 		
 		//echo $_FILES[$key]['tmp_name'];
 	
 		if (!is_writeable('/tmp/images')) {
-			echo '/tmp/images not writeable';
+			echo "$tmp_dir not writeable\n";
 			exit;
 		}
 		

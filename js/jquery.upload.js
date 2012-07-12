@@ -1,4 +1,4 @@
-(function($, window, undefined) {
+(function($, window, document, undefined) {
 	
 	/**
 	 * Constructor (expose Upload)
@@ -11,6 +11,19 @@
 	};
 	
 	/**
+	 * Extend jQuery to add custom methods
+	 */ 
+	$.extend($.fn, {
+		isChildOf:  function(parent) {
+			return $(this).parents().filter(parent).length>0;
+		},
+		outerHtml: function() {
+			return $(this).clone().wrap('<div>').parent().html();	
+		}
+	});
+	
+	
+	/**
 	 * Upload object 
 	 *
 	 * @param DOM element the DOM element that this plugin is bound to
@@ -18,15 +31,21 @@
 	 * @return Upload object
 	 */
 	var Upload = function(element, opts) {
-		var self = this;
+		var self   = this;
 
 		/**
 		 * The default options 
 		 */
 		var _defaultOptions = {
 			multiple 		 : false,
-			queue			 : false,
+			queue 			 : null,
 			showQueue 		 : true,
+			queueOptions	 : {
+				name 	 	 : true,
+				type 	 	 : true,
+				size 	 	 : true,
+				lastModified : true	
+			},
 			auto 	  		 : true,
 			debug 	  		 : true,
 			dragDrop  		 : true,
@@ -63,10 +82,6 @@
 		 */
 		self.element = null;
 		/**
-		 * The files to send
-		 */
-		self.files = [];
-		/**
 		 * Whether or not the browser supports HTML5 File API
 		 */
 		self.supportsFileUpload = true;
@@ -82,24 +97,39 @@
 	 	 *
 	 	 * @param array the array of files that were selected
 	 	 */
-		var _buildQueue = function() {
+		var _buildQueueHtml = function() {
+			var options = self.options.queueOptions;
 			
 			// Output debug info
 			_debug('in _buildQueue');
+			
+			_debug(self.queue);
 	
 			var output = [];
 
 		   	// loop through the array and build the html
-		    for (var i = 0, file; file = self.files[i]; i++) {	
+		    for (var i = 0, file; file = self.queue[i]; i++) {		  
 				
-				// Push the file into the queue
-		    	self.queue.push(file);
+				// Create element
+				var element = $('<li>');
+				
+				// Build options
+				if (options.name)
+					element.append('<strong>' + escape(file.name) + '</strong>');
+				
+				if (options.type)
+					element.append(' ' + file.type + ' ');
+					
+				if (options.size)
+					element.append(' ' + _bytesToSize(file.size, 2) );
+				
+				if (options.lastModified)
+					(file.lastModifiedDate)
+						? element.append(' ' + file.lastModifiedDate.toLocaleDateString())
+						: element.append(' n/a');
 
 		    	// Build the output html
-		      	output.push('<li><strong>', escape(file.name), '</strong> (', file.type || 'n/a', ') - ',
-		                  file.size, ' bytes, last modified: ',
-		                  file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() : 'n/a',
-		                  '</li>');
+		      	output.push(element.outerHtml());
 		    }
 			
 			// Set the html in the qeue
@@ -110,6 +140,30 @@
 				? self.options.queue.show()
 				: self.options.queue.hide();
 		};	
+		
+		/**
+		 * Convert number of bytes into human readable format
+		 *
+		 * reference: http://codeaid.net/javascript/convert-size-in-bytes-to-human-readable-format-(javascript)
+		 *
+		 * @param integer bytes     Number of bytes to convert
+		 * @param integer precision Number of digits after the decimal separator
+		 * @return string
+		 */
+		var _bytesToSize = function(bytes, precision) {  			
+			var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+			var posttxt = 0;
+			
+			if (bytes == 0) 
+				return 'n/a';
+			
+			while( bytes >= 1024 ) {
+				posttxt++;
+				bytes = bytes / 1024;
+			}
+			
+			return Number(bytes).toFixed(precision) + " " + sizes[posttxt];
+		}
 		
 		/**
 		 * Output debug info
@@ -158,15 +212,15 @@
 			var dt 		 = e.originalEvent.dataTransfer;
 			var files 	 = dt.files;
 
-			if(dt.files.length > 0){
+			if (dt.files.length > 0) {
 				var file = dt.files[0];
-				self.files.push(file);
+				self.queue.push(file);
 			}
 
 			// Build the queue
-		   	if (self.options.queue)
-			   	_buildQueue();
-
+		   	_buildQueueHtml();
+				
+			// If options.auto is set, upload the file instantly
 			if (self.options.auto)
 				self.send();
 
@@ -195,13 +249,15 @@
 			self.options.multiple
 				 ? self.element.attr('multiple', 'multiple')
 				 : self.element.removeAttr('multiple');
+			
+			// Check if the browser supports AJAX File upload via XHR Level 2
+			self.supportsFileUpload = _checkFileUpload();
 
-			if (! _checkFileUpload() )
-				self.supportsFileUpload = false;
-
+			// Initialize the form if an input is attached
 			if (self.options.inputFile || self.element.is('input')) 
 				_initForm();
 
+			// Initialize drag and drop if a dropzone is attached
 			if (self.options.dragDrop || self.element.is('div'))
 				_initDragDrop();	
 		};
@@ -210,7 +266,12 @@
 		 * Drag and drop
 		 */
 		var _initDragDrop = function() {
-			var dropZone = self.options.dropZone || self.element;
+			var dropZone = (self.element.is('div'))
+								? self.element
+								: self.options.dropZone;
+
+			// Clear html
+			dropZone.html('');
 
 			// Build dropzone
 			dropZone.append('<span></span>')
@@ -219,6 +280,7 @@
 				.css('vertical-align', 'middle');
 			dropZone.find('span')
 				.html(self.options.dropZoneText)
+				.addClass('dropzone-text')
 				.css('color','grey')
 				.css('top', '50%');
 
@@ -243,18 +305,17 @@
 				inputFile.text(self.options.inputText);
 				
 				inputFile.live('change', function(e) {
-				    self.files = e.target.files; 
+				    self.queue = e.target.files; 
 
 				    // Check if files selected where over the limit or is not set to zero (unlimited)
-				    if( self.files.length > self.options.fileLimit && self.options.fileLimit != 0) {
-				    	self.files = null;
+				    if( self.queue.length > self.options.fileLimit && self.options.fileLimit != 0) {
+				    	self.queue = null;
 	    				alert('File limit is ' + self.options.fileLimit);
 	    				return false;
 	    			}
 
 	    			// Build the queue
-				   	if (self.options.queue)
-						_buildQueue();
+					_buildQueueHtml();
 
 				    // If auto is set, send the request immediately
 				    if (self.options.auto)
@@ -266,7 +327,9 @@
 		/**
 		 * Check if the browser supports FormData, part of XHR Level 2
 		 */
-		var _checkFileUpload = function() {
+		var _checkFileUpload = function() {	
+			return false;
+				
 			return (typeof(window.FormData) === 'undefined') 
 						? false
 						: true;
@@ -292,10 +355,79 @@
 	    };
 		
 		/**
+		 * Handle iFrame load
+		 */
+		var _onIframeOnLoad = function(response, status, xhr) {
+			_debug('successful response');
+			
+			// TODO: figure out how to get HTTP Status Code 
+			
+			//_debug(response);
+			_debug('iFrame response: ');
+			_debug(status);
+			_debug(xhr);
+			
+			//if (status == "error") {
+			//	self.options.onError(xhr, status, xhr.statusText);
+			//} else {
+				content = ($(this).contents().find('body').find('pre').length > 0)
+								? $(this).contents().find('body').find('pre').html()
+								: $(this).contents().find('body').html();
+				
+				self.options.onSuccess(content, status, xhr);
+			//}
+			
+			$(this).remove();
+		};
+		
+		/**
 		 * Send a file via old iFrame hack since XHR Level 2 is not supported 
 		 */
 		var _sendFileIframe = function() {
 			_debug('in sendFileIframe');
+			
+			var iframe = $('#upload_frame');
+			
+			// Append iFrame to the body 
+			if ( iframe.length <= 0 ) {
+				iframe = $('<iframe/>', {
+					name 	: 'upload_frame',
+					id 		: 'upload_frame',
+					'class'	: 'hidden', 		// Need to use quotes here since it's a Javascript reserved word and IE will choke
+					width	: 0, 
+					height	: 0,
+					border	: 0
+				}).appendTo($(document).find('body'));
+				
+				// Hide iFrame
+				iframe.css('display', 'none');
+				
+				// Add event handler
+				iframe.load('', _onIframeOnLoad);
+			}
+			
+			// Setup the form
+			if (! self.element.is('input') ) {
+				_debug('not an input');
+				
+				
+			} else {
+				_debug('is an input');
+				
+				// Wrap the input in a form if it isn't already
+				if (! self.element.isChildOf('form') ) 
+					self.element.wrap('<form>');
+				
+				// Set form attributes
+				var form = self.element.closest('form');
+				form.attr('action', self.options.action);
+				form.attr('target', 'upload_frame');
+				form.attr('method', 'post');
+				form.attr('enctype', 'multipart/form-data');
+				form.attr('encoding', 'multipart/form-data');
+				
+				form.submit();
+			}
 		};
 		
 		/**
@@ -308,7 +440,7 @@
 	
 			// Build the formData
 			var formData = new FormData();
-			$.each(self.files, function(i, file) {
+			$.each(self.queue, function(i, file) {
 				formData.append('file-'+i, file);
 			});
 	
@@ -323,7 +455,7 @@
 				processData : false,
 				beforeSend  : function(xhr) {
 					self.options.beforeSend(xhr);
-					var file = self.files[0];
+					var file = self.queue[0];
 	
 					if (!file)
 						_debug('No files in queue');
@@ -340,10 +472,8 @@
 				success 	: function(data, textStatus, jqXHR) {
 					self.options.onSuccess(data, textStatus, jqXHR);
 					
-					if (self.options.debug)
-						console.log(data);
+					_debug(console.log(data));
 						
-					self.clearFiles();
 				},
 				error 		: function(jqXHR, textStatus, errorThrown) {
 					self.options.onError(jqXHR, textStatus, errorThrown);
@@ -364,15 +494,6 @@
 		};
 		
 		/**
-		 * Clears the files
-		 */
-		self.clearFiles = function() {
-			var self = this;
-	
-			self.files = [];
-		};
-		
-		/**
 		 * Send the request
 		 *
 		 * @param array an array of the files to upload
@@ -388,4 +509,4 @@
 		_init();
 		
 	}; // End Upload Class
-})(jQuery, window);
+})(jQuery, window, document);
