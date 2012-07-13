@@ -49,12 +49,11 @@
 			auto 	  		 : true,
 			debug 	  		 : true,
 			dragDrop  		 : true,
-			mimeType		 : 'image',
+			fileType	 	 : 'image',
 			allowedExts 	 : null,
 			dropZone 		 : null,
 			dropZoneText	 : 'Drop files here...',
 			inputFile 		 : null,
-			inputText		 : 'Choose File',
 			dropZoneTextSize : '20px',
 			dzDragOverColor  : '#99CCFF',
 			sizeLimit		 : 0,
@@ -102,43 +101,52 @@
 			
 			// Output debug info
 			_debug('in _buildQueue');
-			
 			_debug(self.queue);
 	
 			var output = [];
-
-		   	// loop through the array and build the html
-		    for (var i = 0, file; file = self.queue[i]; i++) {		  
+			
+			// loop through the array and build the html
+			for (var i = 0, file; file = self.queue[i]; i++) {		  
+				
+				_debug(file.name);
 				
 				// Create element
-				var element = $('<li>');
+				var li = '<li>';
 				
 				// Build options
 				if (options.name)
-					element.append('<strong>' + escape(file.name) + '</strong>');
+					li += '<strong>' + escape(file.name) + '</strong>';
 				
-				if (options.type)
-					element.append(' ' + file.type + ' ');
+				// Don't have the rest of the info if IE<10 (IE sucks!!!)
+				if (! $.browser.msie ) {
+				
+					if (options.type)
+						li += ' ' + file.type + ' ';
+						
+					if (options.size)
+						li += ' ' + _bytesToSize(file.size, 2);
 					
-				if (options.size)
-					element.append(' ' + _bytesToSize(file.size, 2) );
+					if (options.lastModified)
+						li += (file.lastModifiedDate)
+							? ' ' + file.lastModifiedDate.toLocaleDateString()
+							: ' n/a';
+				}
 				
-				if (options.lastModified)
-					(file.lastModifiedDate)
-						? element.append(' ' + file.lastModifiedDate.toLocaleDateString())
-						: element.append(' n/a');
-
-		    	// Build the output html
-		      	output.push(element.outerHtml());
-		    }
+				li += '</li>';
+				
+				// Build the output html
+				output.push(li);
+				
+			}
 			
 			// Set the html in the qeue
 			self.options.queue.html('<ul>' + output.join('') + '</ul>');
 
-			// Check if the queue should be shown
+			// Check if the queue should be shown	
 			self.options.showQueue
 				? self.options.queue.show()
 				: self.options.queue.hide();
+		
 		};	
 		
 		/**
@@ -164,6 +172,24 @@
 			
 			return Number(bytes).toFixed(precision) + " " + sizes[posttxt];
 		}
+		
+		/**
+		 * Check if the browser supports FormData, part of XHR Level 2
+		 */
+		var _checkFileUpload = function() {					
+			return (typeof(window.FormData) === 'undefined') 
+						? false
+						: true;
+		};
+		
+		/**
+		 * Check if the browser supports HTML5 File API
+		 */
+		var _checkFileApi = function() {	
+			return (typeof FileReader === "undefined") 
+						? false
+						: true;
+		};
 		
 		/**
 		 * Output debug info
@@ -234,7 +260,7 @@
 			e.stopPropagation();  
 		    e.preventDefault();  
 
-		    return false; // Needed for IE
+		    return false; // Needed for IE, of course
 		};
 
 		/**
@@ -260,12 +286,15 @@
 			// Initialize drag and drop if a dropzone is attached
 			if (self.options.dragDrop || self.element.is('div'))
 				_initDragDrop();	
+	
 		};
 		
 		/**
 		 * Drag and drop
 		 */
 		var _initDragDrop = function() {
+						
+			// Set the dropzone
 			var dropZone = (self.element.is('div'))
 								? self.element
 								: self.options.dropZone;
@@ -278,62 +307,90 @@
 				.css('text-align', 'center')
 				.css('display', 'table-cell')
 				.css('vertical-align', 'middle');
-			dropZone.find('span')
-				.html(self.options.dropZoneText)
-				.addClass('dropzone-text')
-				.css('color','grey')
-				.css('top', '50%');
-
-
-			// Add events
-			var xhr = new XMLHttpRequest();
-			if (xhr.upload) {  
-		        dropZone.live("dragover", 	_drapOver);  
-		        dropZone.live("dragleave", 	_drapLeave);  
-		        dropZone.live("drop", 		_drop);
-			};
+			
+			// Check if Drap and Drop is even possible
+			if ( _checkFileApi() ) {
+				dropZone.find('span')
+					.html(self.options.dropZoneText)
+					.addClass('dropzone-text')
+					.css('color','grey')
+					.css('top', '50%');
+	
+	
+				// Add events
+				var xhr = new XMLHttpRequest();
+				if (xhr.upload) {  
+					dropZone.live("dragover", 	_drapOver);  
+					dropZone.live("dragleave", 	_drapLeave);  
+					dropZone.live("drop", 		_drop);
+				};
+			} else {
+				
+				// Drag and Drop is not possible... let them know!
+				dropZone.find('span')
+					.html('Drag and Drop not supported! <br>Update your browser!!!')
+					.addClass('dropzone-text')
+					.css('color','white')
+					.css('top', '50%');
+				dropZone.css('background-color', 'red');
+			}
 		};
 		
 		/**
 		 * Initialize the form element (i.e. input)
 		 */
 		var _initForm = function() {
-			var inputFile = self.options.inputFile || self.element
+			var inputFile = self.options.inputFile || self.element 
 			
 			// Bind on change event to the element if it's a form input
 			if (inputFile.is('input')) {
-				inputFile.text(self.options.inputText);
 				
-				inputFile.live('change', function(e) {
-				    self.queue = e.target.files; 
-
-				    // Check if files selected where over the limit or is not set to zero (unlimited)
-				    if( self.queue.length > self.options.fileLimit && self.options.fileLimit != 0) {
-				    	self.queue = null;
-	    				alert('File limit is ' + self.options.fileLimit);
-	    				return false;
-	    			}
-
-	    			// Build the queue
-					_buildQueueHtml();
-
-				    // If auto is set, send the request immediately
-				    if (self.options.auto)
-						self.send();
-				});
-			}	
+				inputFile.live('change', function(e) {					
+					
+					// Check for IE 
+					if ($.browser.msie) {
+					
+						// IE suspends timeouts until after the file dialog closes
+						setTimeout(function() {	
+							var File = {
+								name: self.element.val().split('\\').pop() 
+							};				
+							
+							// Add files to the queue							
+							self.queue.push(File);
+							
+							// Build the queue
+							_buildQueueHtml();
+							
+							// If auto is set, send the request immediately
+							if (self.options.auto)
+								self.send();
+						}, 0);
+					} else {
+						
+						// Add files to the queue
+						self.queue = e.target.files; 
+							
+						// Check if files selected where over the limit or is not set to zero (unlimited)
+						if( self.queue.length > self.options.fileLimit && self.options.fileLimit != 0) {
+							self.queue = null;
+							alert('File limit is ' + self.options.fileLimit);
+							return false;
+						}
+					
+	
+						// Build the queue
+						_buildQueueHtml();
+	
+						// If auto is set, send the request immediately
+						if (self.options.auto)
+							self.send();
+					}
+				});	
+				
+			}
+				
 		}
-
-		/**
-		 * Check if the browser supports FormData, part of XHR Level 2
-		 */
-		var _checkFileUpload = function() {	
-			return false;
-				
-			return (typeof(window.FormData) === 'undefined') 
-						? false
-						: true;
-		};
 
 		/**
 		 * Override xhr in $.ajax to attah an onProgress event listener
@@ -403,7 +460,7 @@
 				iframe.css('display', 'none');
 				
 				// Add event handler
-				iframe.load('', _onIframeOnLoad);
+				iframe.one('load', _onIframeOnLoad);
 			}
 			
 			// Setup the form
@@ -472,13 +529,11 @@
 				success 	: function(data, textStatus, jqXHR) {
 					self.options.onSuccess(data, textStatus, jqXHR);
 					
-					_debug(console.log(data));
+					_debug(data);
 						
 				},
 				error 		: function(jqXHR, textStatus, errorThrown) {
 					self.options.onError(jqXHR, textStatus, errorThrown);
-					
-					self.clearFiles();
 				}
 			});
 		};
@@ -489,8 +544,13 @@
 		self.clearQueue = function() {
 			var self = this;
 	
+			_debug('In clearQueue');
+			_debug(self.queue);
+		
 			self.queue = [];
 			self.options.queue.html('');
+			
+			_debug(self.queue);
 		};
 		
 		/**

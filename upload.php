@@ -50,7 +50,7 @@ if (empty($_FILES)) {
 	if ($filename) {
 		$ext = getFileExt($filename); 
 		
-		$path = $tmp_dir . uniqid() . $ext;
+		$path = $tmp_dir . '/' . uniqid() . $ext;
 	
 		echo $data; exit;	
 
@@ -65,11 +65,11 @@ if (empty($_FILES)) {
 	//print_r($_FILES); exit;
 
 	foreach ($_FILES as $key=>$value) {
-		$path = $tmp_dir . uniqid() . '.png';
+		$path = $tmp_dir . '/' . uniqid() . '.png';
 		
 		//echo $_FILES[$key]['tmp_name'];
 	
-		if (!is_writeable('/tmp/images')) {
+		if (!is_writeable($tmp_dir)) {
 			echo "$tmp_dir not writeable\n";
 			exit;
 		}
