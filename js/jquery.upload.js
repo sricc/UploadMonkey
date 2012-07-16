@@ -37,6 +37,7 @@
 		 * The default options 
 		 */
 		var _defaultOptions = {
+			fileLimit		 : 0,
 			multiple 		 : false,
 			queue 			 : null,
 			showQueue 		 : true,
@@ -59,9 +60,10 @@
 			sizeLimit		 : 0,
 			method 			 : 'post',
 			action 			 : 'upload.php',
-			onSuccess 		 : function() {},
-			onError 		 : function() {},
-			beforeSend 		 : function() {}
+			onComplete		 : function(jqXHR, textStatus) {},
+			onSuccess 		 : function(data, textStatus, jqXHR) {},
+			onError 		 : function(jqXHR, textStatus, errorThrown) {},
+			beforeSend 		 : function(xhr) {}
 		};
 
 		/**
@@ -100,7 +102,7 @@
 			var options = self.options.queueOptions;
 			
 			// Output debug info
-			_debug('in _buildQueue');
+			_debug('Queue: ');
 			_debug(self.queue);
 	
 			var output = [];
@@ -176,7 +178,9 @@
 		/**
 		 * Check if the browser supports FormData, part of XHR Level 2
 		 */
-		var _checkFileUpload = function() {					
+		var _checkFileUpload = function() {		
+			return false;
+					
 			return (typeof(window.FormData) === 'undefined') 
 						? false
 						: true;
@@ -229,11 +233,6 @@
 			// Change background color back to white
 			$(this).css('background-color', '#FFF');
 			
-			// Output debug info
-			_debug('dropped');
-	
-			_ignoreDrag(e);
-
 			var dropZone = self.options.dropZone;
 			var dt 		 = e.originalEvent.dataTransfer;
 			var files 	 = dt.files;
@@ -269,6 +268,7 @@
 		var _init = function() {
 
 			// Output debug info
+			_debug('Options: ');
 			_debug(self.options);
 			
 			// Check if multiple is enabled
@@ -284,7 +284,7 @@
 				_initForm();
 
 			// Initialize drag and drop if a dropzone is attached
-			if (self.options.dragDrop || self.element.is('div'))
+			if ( (self.options.dragDrop && self.options.dropZone !== null) || self.element.is('div'))
 				_initDragDrop();	
 	
 		};
@@ -298,6 +298,12 @@
 			var dropZone = (self.element.is('div'))
 								? self.element
 								: self.options.dropZone;
+			
+			// Check if a dropzone was specified or if we are attached to a div
+			if (!dropZone) { 
+				_debug('No dropZone specified, can not initialize.');
+				return;
+			}
 
 			// Clear html
 			dropZone.html('');
@@ -340,7 +346,13 @@
 		 * Initialize the form element (i.e. input)
 		 */
 		var _initForm = function() {
-			var inputFile = self.options.inputFile || self.element 
+			
+			var inputFile = self.element.is('input')
+								? self.element
+								: self.options.inputFile;
+			
+			if (! inputFile.is('input') )
+				_debug('No <input> element found');
 			
 			// Bind on change event to the element if it's a form input
 			if (inputFile.is('input')) {
@@ -415,25 +427,29 @@
 		 * Handle iFrame load
 		 */
 		var _onIframeOnLoad = function(response, status, xhr) {
-			_debug('successful response');
-			
-			// TODO: figure out how to get HTTP Status Code 
-			
-			//_debug(response);
-			_debug('iFrame response: ');
-			_debug(status);
-			_debug(xhr);
-			
-			//if (status == "error") {
-			//	self.options.onError(xhr, status, xhr.statusText);
-			//} else {
-				content = ($(this).contents().find('body').find('pre').length > 0)
-								? $(this).contents().find('body').find('pre').html()
-								: $(this).contents().find('body').html();
 				
-				self.options.onSuccess(content, status, xhr);
-			//}
+			// Get results	
+			content = ($(this).contents().find('body').find('pre').length > 0)
+							? $(this).contents().find('body').find('pre').html()
+							: $(this).contents().find('body').html();
 			
+			// Parse the JSON repsonse
+			var data = $.parseJSON(content);
+			
+			// Check if the response could be parsed
+			if ((data !== null)) {
+					
+				// If the request was a succes, call onSuccess	
+				(data.success)
+					? self.options.onSuccess(data, data.success.toString())
+					: self.options.onError(data, data.success.toString());
+					
+				// Always call onComplete
+				self.options.onComplete(data, data.success.toString());
+			} else
+				_debug('Response was not valid JSON');
+			
+			// Remove the iFrame
 			$(this).remove();
 		};
 		
@@ -441,16 +457,20 @@
 		 * Send a file via old iFrame hack since XHR Level 2 is not supported 
 		 */
 		var _sendFileIframe = function() {
-			_debug('in sendFileIframe');
 			
+			// Output debug info
+			_debug('Can not use normal input, falling back to iFrame hack!');
+			
+			// Check if there is already an iFrame with ID upload_frame
 			var iframe = $('#upload_frame');
 			
 			// Append iFrame to the body 
 			if ( iframe.length <= 0 ) {
-				iframe = $('<iframe/>', {
+				iframe = $('<iframe></iframe>', {
 					name 	: 'upload_frame',
 					id 		: 'upload_frame',
 					'class'	: 'hidden', 		// Need to use quotes here since it's a Javascript reserved word and IE will choke
+					src  	: '',
 					width	: 0, 
 					height	: 0,
 					border	: 0
@@ -461,28 +481,30 @@
 				
 				// Add event handler
 				iframe.one('load', _onIframeOnLoad);
-			}
+			} 
+			
 			
 			// Setup the form
-			if (! self.element.is('input') ) {
-				_debug('not an input');
+			if ( self.element.is('input') || self.options.inputFile !== null) {
 				
-				
-			} else {
-				_debug('is an input');
+				// Set the input element				
+				var input = self.element.is('input')
+								? self.element
+								: self.options.inputFile;
 				
 				// Wrap the input in a form if it isn't already
-				if (! self.element.isChildOf('form') ) 
-					self.element.wrap('<form>');
+				if (! input.isChildOf('form') ) 
+					input.wrap('<form>');
 				
 				// Set form attributes
-				var form = self.element.closest('form');
-				form.attr('action', self.options.action);
-				form.attr('target', 'upload_frame');
-				form.attr('method', 'post');
-				form.attr('enctype', 'multipart/form-data');
-				form.attr('encoding', 'multipart/form-data');
-				
+				var form = input.closest('form');
+				form.attr('action',		self.options.action);
+				form.attr('target', 	'upload_frame');
+				form.attr('method', 	'post');
+				form.attr('enctype', 	'multipart/form-data');
+				form.attr('encoding', 	'multipart/form-data');
+	
+				// Submit the form
 				form.submit();
 			}
 		};
@@ -491,10 +513,7 @@
 		 * Send a file via XHR Level 2 
 		 */
 		var _sendFileAjax = function() {
-					
-			// Output debug info
-			_debug('in _sendFileAjax');
-	
+				
 			// Build the formData
 			var formData = new FormData();
 			$.each(self.queue, function(i, file) {
@@ -513,7 +532,8 @@
 				beforeSend  : function(xhr) {
 					self.options.beforeSend(xhr);
 					var file = self.queue[0];
-	
+					
+					// Check if there is a file
 					if (!file)
 						_debug('No files in queue');
 	
@@ -528,29 +548,84 @@
 				},
 				success 	: function(data, textStatus, jqXHR) {
 					self.options.onSuccess(data, textStatus, jqXHR);
-					
-					_debug(data);
 						
 				},
 				error 		: function(jqXHR, textStatus, errorThrown) {
 					self.options.onError(jqXHR, textStatus, errorThrown);
+				},
+				complete 	: function(jqXHR, textStatus) {
+					
+					// Always call onComplete
+					self.options.onComplete(jqXHR, textStatus);	
 				}
 			});
 		};
-	
-		/**
-		 * Clears the queue
-		 */
-		self.clearQueue = function() {
-			var self = this;
-	
-			_debug('In clearQueue');
-			_debug(self.queue);
 		
+		/**
+		 * Resets the queue, input and dropzone
+		 */
+		self.reset = function() {
+			
+			// Reset the queue
+			self.resetQueue();
+			
+			// Reset the dropzone
+			self.resetDropzone();
+			
+			// Reset the input
+			self.resetInput();
+			
+			// Output debug info
+			_debug('Reset');	
+		};
+		
+		/**
+		 * Resets the dropzone
+		 */
+		self.resetDropzone = function() {
+			
+			// Reset the dropzone
+			_initDragDrop();
+			
+			// Output debug info
+			_debug('Dropzone Reset');
+		};
+		
+		/**
+		 * Resets the input
+		 */
+		self.resetInput = function() {
+			
+			// Reset the input if it's the one we are attached to
+			if (self.element.is('input')) {
+				var empty_input = self.element.clone();
+				self.element.replaceWith(empty_input);		// Have to replace the input since it's read-only
+			}
+			
+			// Reset the input if it's specified
+			if (self.options.fileInput) {
+				if (self.options.fileInput.is('input'))
+					self.options.fileInput.replaceWith(empty_input); // Have to replace the input since it's read-only
+			}
+			
+			// Reset the dropzone
+			_initForm();
+			
+			// Output debug info
+			_debug('Dropzone Reset');
+		};
+		
+		/**
+		 * Resets the queue
+		 */
+		self.resetQueue = function() {
+			
+			// Clear the queue
 			self.queue = [];
 			self.options.queue.html('');
 			
-			_debug(self.queue);
+			// Output debug info
+			_debug('Queue reset');
 		};
 		
 		/**
@@ -559,11 +634,18 @@
 		 * @param array an array of the files to upload
 		 */
 		self.send = function() {
+			
+			// Check if there are any files to upload
+			if(self.queue.length <= 0) {
+				_debug('No files to upload');
+				return;
+			}
+			
+			// Send the request
 			(self.supportsFileUpload)
 				? _sendFileAjax()
 				: _sendFileIframe();
-		}	
-		
+		};	
 		
 		// Initialize
 		_init();

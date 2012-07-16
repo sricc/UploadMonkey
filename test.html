@@ -21,10 +21,15 @@
 
 <div id="dropzone" class="uploadable"></div>
 
-<input type="file" id="files" name="files[]" />
+<input type="file" name='file' id="files" name="files[]" />
 
-<a href='#' id='upload'>Upload</a>
-<a href='#' id='clear'>Clear Queue</a>
+<ul>
+	<li><a href='#' id='upload'>Upload</a></li>
+	<li><a href='#' id='resetQueue'>Reset Queue</a></li>
+	<li><a href='#' id='resetDropzone'>Reset Dropzone</a></li>
+    <li><a href='#' id='resetInput'>Reset Input</a></li>
+	<li><a href='#' id='reset'>Reset</a></li>
+</ul>
 
 <div id="list"></div>
 
@@ -45,8 +50,8 @@
 			multiple 		: true,
 			method 			: 'post',
 			dragDrop 		: true,
-			//dropZone 		: $('#dropzone'),
-			//dropZoneText 	: 'Drop files here...',
+			dropZone 		: $('#dropzone'),
+			dropZoneText 	: 'Drop files here...',
 			inputText		: 'Select Files',
 			queue 			: $('#list'),
 			showQueue  		: true,
@@ -56,16 +61,17 @@
 				size 	 	 : true,
 				lastModified : true	
 			},
-			action 			: 'http://localhost/upload/upload.php',
+			action 			: 'http://www.upload.me.com/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('onSuccess');
 				
 				console.log(data);
-				//console.log(data.url);
-				//$('#dropzone').html('<img src="http://localhost/../../..' + data.url + '" />');
+				console.log(textStatus);
 			},
-			onError 		: function() {
+			onError 		: function(data, textStatus) {
 				console.log('onError');	
+				
+				console.log(data);
 			}
 		});
 		
@@ -90,20 +96,32 @@
 
 		$('#upload').live('click', function(e) {
 			e.preventDefault();
-			
-			console.log('send');
 
 			upload.send();
 		});
 
-		$('#clear').live('click', function(e) {			
+		$('#resetQueue').live('click', function(e) {			
 			e.preventDefault();
-			
-			console.log(upload);
-			
-			console.log('clear');
 
-			upload.clearQueue();
+			upload.resetQueue();
+		});
+		
+		$('#reset').live('click', function(e) {			
+			e.preventDefault();
+
+			upload.reset();
+		});
+		
+		$('#resetDropzone').live('click', function(e) {			
+			e.preventDefault();
+
+			upload.resetDropzone();
+		});
+		
+		$('#resetInput').live('click', function(e) {			
+			e.preventDefault();
+
+			upload.resetInput();
 		});
 	
 	});

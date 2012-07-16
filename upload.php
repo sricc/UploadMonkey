@@ -61,27 +61,24 @@ if (empty($_FILES)) {
 } else {
 	$response = array();
 	$error 	  = array();
-	
-	//print_r($_FILES); exit;
 
 	foreach ($_FILES as $key=>$value) {
 		$path = $tmp_dir . '/' . uniqid() . '.png';
-		
-		//echo $_FILES[$key]['tmp_name'];
 	
 		if (!is_writeable($tmp_dir)) {
 			echo "$tmp_dir not writeable\n";
 			exit;
-		}
+		}		
 		
-		if ($_FILES[$key]['error'] == UPLOAD_ERR_OK) {
+		if ($_FILES[$key]['error'] == UPLOAD_ERR_OK) {						
 			move_uploaded_file($_FILES[$key]['tmp_name'], $path)
 				? array_push($response, array('url'=>$path))
-				: array_push($error, array('message'=>'Error saving file: ' . $_FILES[$key]['name']));
+				: array_push($error, array('error'=>'Error saving file: ' . $_FILES[$key]['name']));
 		}
 	}
-	
+
 	(empty($error)) 
-		? sendAjaxResponse(201, array('url'=>$path))
-		: sendAjaxResponse(500, array('error'=>$error));
+		? sendAjaxResponse(201, array('success'=>true, 'url'=>$path))
+		: sendAjaxResponse(500, array('success'=>false, 'error'=>$error));
+		
 }
