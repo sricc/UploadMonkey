@@ -179,8 +179,6 @@
 		 * Check if the browser supports FormData, part of XHR Level 2
 		 */
 		var _checkFileUpload = function() {		
-			return false;
-					
 			return (typeof(window.FormData) === 'undefined') 
 						? false
 						: true;
@@ -237,8 +235,8 @@
 			var dt 		 = e.originalEvent.dataTransfer;
 			var files 	 = dt.files;
 
-			if (dt.files.length > 0) {
-				var file = dt.files[0];
+			if (files.length > 0) {
+				var file = files[0];
 				self.queue.push(file);
 			}
 
@@ -383,14 +381,13 @@
 						// Add files to the queue
 						self.queue = e.target.files; 
 							
-						// Check if files selected where over the limit or is not set to zero (unlimited)
+						// Check if the number of files selected where over the limit or is set to zero (unlimited)
 						if( self.queue.length > self.options.fileLimit && self.options.fileLimit != 0) {
-							self.queue = null;
+							self.resetQueue();
 							alert('File limit is ' + self.options.fileLimit);
 							return false;
 						}
 					
-	
 						// Build the queue
 						_buildQueueHtml();
 	
@@ -405,7 +402,7 @@
 		}
 
 		/**
-		 * Override xhr in $.ajax to attah an onProgress event listener
+		 * Override xhr in $.ajax to attach an onProgress event listener
 		 *
 		 * @return object the xhr object
 	 	 */
@@ -466,7 +463,7 @@
 			
 			// Append iFrame to the body 
 			if ( iframe.length <= 0 ) {
-				iframe = $('<iframe></iframe>', {
+				iframe = $('<iframe/>', {
 					name 	: 'upload_frame',
 					id 		: 'upload_frame',
 					'class'	: 'hidden', 		// Need to use quotes here since it's a Javascript reserved word and IE will choke
@@ -595,24 +592,27 @@
 		 * Resets the input
 		 */
 		self.resetInput = function() {
+			var empty_input;
 			
 			// Reset the input if it's the one we are attached to
 			if (self.element.is('input')) {
-				var empty_input = self.element.clone();
+				empty_input = self.element.clone();
 				self.element.replaceWith(empty_input);		// Have to replace the input since it's read-only
 			}
 			
 			// Reset the input if it's specified
 			if (self.options.fileInput) {
-				if (self.options.fileInput.is('input'))
+				if (self.options.fileInput.is('input')) {
+					empty_input = self.options.fileInput.clone();
 					self.options.fileInput.replaceWith(empty_input); // Have to replace the input since it's read-only
+				}
 			}
 			
 			// Reset the dropzone
 			_initForm();
 			
 			// Output debug info
-			_debug('Dropzone Reset');
+			_debug('Input Reset');
 		};
 		
 		/**
@@ -626,6 +626,8 @@
 			
 			// Output debug info
 			_debug('Queue reset');
+			_debug('Queue: ')
+			_debug(self.queue);
 		};
 		
 		/**
