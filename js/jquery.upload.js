@@ -31,7 +31,8 @@
 	 * @return Upload object
 	 */
 	var Upload = function(element, opts) {
-		var self   = this;
+		var self     = this;
+		var progress = {};
 
 		/**
 		 * The default options 
@@ -45,7 +46,8 @@
 				name 	 	 : true,
 				type 	 	 : true,
 				size 	 	 : true,
-				lastModified : true	
+				lastModified : true,
+				progressBar	 : true
 			},
 			auto 	  		 : true,
 			debug 	  		 : true,
@@ -116,7 +118,7 @@
 				_debug(file.name);
 				
 				// Create element
-				var li = '<li>';
+				var li = '<li><span>';
 				
 				// Build options
 				if (options.name)
@@ -137,6 +139,12 @@
 							: ' n/a';
 				}
 				
+				li += '</span>';
+				
+				// Set progress bar for PUT
+				if ( options.progressBar && (self.options.method.toUpperCase() === 'PUT') )
+					li += '<progress id="bar_' + i + '" max="100" value="0"></progress>';
+				
 				li += '</li>';
 				
 				// Build the output html
@@ -145,7 +153,19 @@
 			}
 			
 			// Set the html in the qeue
-			self.options.queue.html('<ul>' + output.join('') + '</ul>');
+			self.options.queue.html('<ul id="queue_list">' + output.join('') + '</ul>');
+			
+			// Set progress bar 
+			if ( options.progressBar ) {
+				
+				// Set progress bar for POST
+				if ( self.options.method.toUpperCase() === 'POST' ) 				
+					self.options.queue.append($('<progress id="bar_filelist" max="100" value="0"></progress>'));
+				
+				$('#queue_list').find('progress')
+					//.css('display', 'none')
+					.css('margin-left', '7px');
+			}
 
 			// Check if the queue should be shown	
 			self.options.showQueue
@@ -177,15 +197,6 @@
 			
 			return Number(bytes).toFixed(precision) + " " + sizes[posttxt];
 		}
-		
-		/**
-		 * Check if the browser supports FormData, part of XHR Level 2
-		 */
-		var _checkFileUpload = function() {		
-			return (typeof(window.FormData) === 'undefined') 
-						? false
-						: true;
-		};
 		
 		/**
 		 * Check if the browser supports HTML5 File API
@@ -285,13 +296,13 @@
 				 : self.element.removeAttr('multiple');
 			
 			// Check if the browser supports AJAX File upload via XHR Level 2
-			self.supportsFileUpload = _checkFileUpload();
+			self.supportsFileUpload = $.support.ajax;
 
-			// Initialize the form if an input is attached
+			// Initialize the form if an input is attached or specified
 			if (self.options.inputFile || self.element.is('input')) 
 				_initForm();
 
-			// Initialize drag and drop if a dropzone is attached
+			// Initialize drag and drop if a dropzone is attached or specified
 			if ( (self.options.dragDrop && self.options.dropZone !== null) || self.element.is('div'))
 				_initDragDrop();	
 	
@@ -495,7 +506,7 @@
 					preview.attr('class', 'file-preview');
 					
 					// Create the image
-					var image 	= $('<img\>')
+					var image 	= $('<img\>');
 					image.attr('src', result);
 					image.attr('alt', '');
 						
@@ -574,39 +585,62 @@
 				formData.append('file-'+i, file);				
 				
 				if (self.options.method.toUpperCase() === 'PUT') 
-					_sendXHR(file);
+					_sendXHR(file, i);
 			});
 			
 			if (self.options.method.toUpperCase() === 'POST') 
 				_sendXHR(formData);
 		};
 		
-		var _sendXHR = function(data) {
+		var _sendXHR = function(data, index) {
+			var progressName = (self.options.method.toUpperCase() === 'PUT')
+									? 'bar_' + index
+									: 'bar_filelist';
+			var progressBar = $('#' + progressName);
+			progressBar.show();
+			
 			// Create request
 			var xhr = new XMLHttpRequest();
 			
 			// Upload progress listener
-			xhr.upload.addEventListener("progress", function(e) {	
+			xhr.upload.addEventListener("progress", function(e) {
+				_debug(e);
+					
 				if (!e.lengthComputable) 
 					self.options.onProgress('Unable to compute progress.');	
 					
-				self.options.onProgress(Math.round(e.loaded * 100 / e.total), e);				
+				var loaded  	= e.position  || e.loaded;
+				var total   	= e.totalSize || e.total;	
+				var percent 	= Math.round( loaded * 100 / total);			
+				
+				
+				_debug(progressBar);
+				
+				// Update the progress bar
+				progressBar.val(percent);
+					
+				// Send back the progress	
+				self.options.onProgress(progressName, percent, e);				
 			}, false);
 			
 			// On success listener
-			xhr.addEventListener("load",  function(e) {
+			xhr.addEventListener("load",  function(e) {				
 				self.options.onSuccess(e.target.response, e.target.status, e);
 			}, false);
 			
 			// On error listener
-			xhr.addEventListener("error", function(e) {
+			xhr.addEventListener("error", function(e) {				
 				self.options.onError(e.target.response, e.target.status, e);
 			}, false);
 			
 			// On cancelled listener 
-			xhr.addEventListener("abort", function(e) {
+			xhr.addEventListener("abort", function(e) {				
 				self.options.onCancelled(e.target.response, e.target.status, e);
 			}, false);
+			
+			xhr.onreadystatechange = function(e) {
+				//_debug(e);
+			};
 			
 			// Open the request		
 			xhr.open(self.options.method.toUpperCase(), self.options.action);
