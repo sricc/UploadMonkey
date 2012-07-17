@@ -55,6 +55,7 @@
 			dropZone 		 : null,
 			dropZoneText	 : 'Drop files here...',
 			inputFile 		 : null,
+			preview 		 : null,
 			dropZoneTextSize : '20px',
 			dzDragOverColor  : '#99CCFF',
 			sizeLimit		 : 0,
@@ -63,6 +64,8 @@
 			onComplete		 : function(jqXHR, textStatus) {},
 			onSuccess 		 : function(data, textStatus, jqXHR) {},
 			onError 		 : function(jqXHR, textStatus, errorThrown) {},
+			onCancelled 	 : function() {},
+			onProgress 	 	 : function(percent, xhr) {},
 			beforeSend 		 : function(xhr) {}
 		};
 
@@ -227,17 +230,24 @@
 		 * Drop event
 		 */
 		var _drop = function(e) {
+			var dropZone = self.options.dropZone;
 			
 			// Change background color back to white
 			$(this).css('background-color', '#FFF');
 			
-			var dropZone = self.options.dropZone;
+			// Get the dropped file
 			var dt 		 = e.originalEvent.dataTransfer;
 			var files 	 = dt.files;
 
 			if (files.length > 0) {
 				var file = files[0];
+				
+				// Add file to the queue
 				self.queue.push(file);
+				
+				// Preview the image, if element is specified
+				if (self.options.preview)
+					_previewImage(file);
 			}
 
 			// Build the queue
@@ -362,12 +372,16 @@
 					
 						// IE suspends timeouts until after the file dialog closes
 						setTimeout(function() {	
-							var File = {
+							var file = {
 								name: self.element.val().split('\\').pop() 
 							};				
 							
 							// Add files to the queue							
-							self.queue.push(File);
+							self.queue.push(file);
+							
+							// Preview the image, if element is specified
+							if (self.options.preview)
+								_previewImage(file);
 							
 							// Build the queue
 							_buildQueueHtml();
@@ -379,7 +393,13 @@
 					} else {
 						
 						// Add files to the queue
-						self.queue = e.target.files; 
+						$.each(e.target.files, function(i, file) {
+							self.queue.push(file);
+							
+							// Preview the image, if element is specified
+							if (self.options.preview)
+								_previewImage(file);
+						});
 							
 						// Check if the number of files selected where over the limit or is set to zero (unlimited)
 						if( self.queue.length > self.options.fileLimit && self.options.fileLimit != 0) {
@@ -451,6 +471,41 @@
 		};
 		
 		/**
+		 * Preview the image
+		 *
+		 * @param file the file to preview
+		 */
+		var _previewImage = function(file) {
+			
+			// Check if the HTML5 File API is supported
+			if (! _checkFileApi() ) {
+				_debug('Browser does not support HTML5 File API');
+				return;
+			}
+			
+			var reader  = new FileReader(),
+				dataUlr = reader.readAsDataURL(file);
+				
+			reader.onloadend = function(e) {
+				var result = e.target.result;
+				
+				if (result !== null) {
+				
+					var preview = self.options.preview;
+					preview.attr('class', 'file-preview');
+					
+					// Create the image
+					var image 	= $('<img\>')
+					image.attr('src', result);
+					image.attr('alt', '');
+						
+					// Add image to the preview element	
+					preview.append(image);	
+				}	
+			}
+		};
+		
+		/**
 		 * Send a file via old iFrame hack since XHR Level 2 is not supported 
 		 */
 		var _sendFileIframe = function() {
@@ -511,51 +566,74 @@
 		 */
 		var _sendFileAjax = function() {
 				
+			_debug(self.queue);	
+				
 			// Build the formData
 			var formData = new FormData();
 			$.each(self.queue, function(i, file) {
-				formData.append('file-'+i, file);
+				formData.append('file-'+i, file);				
+				
+				if (self.options.method.toUpperCase() === 'PUT') 
+					_sendXHR(file);
 			});
-	
-			// Send the AJAX request
-			$.ajax({
-				url 		: self.options.action,
-				type 		: self.options.method.toUpperCase(),
-				//xhr 		: Upload.uploadXHR,
-				data 		: formData,
-				cache 		: false,
-				contentType : false,
-				processData : false,
-				beforeSend  : function(xhr) {
-					self.options.beforeSend(xhr);
-					var file = self.queue[0];
+			
+			if (self.options.method.toUpperCase() === 'POST') 
+				_sendXHR(formData);
+		};
+		
+		var _sendXHR = function(data) {
+			// Create request
+			var xhr = new XMLHttpRequest();
+			
+			// Upload progress listener
+			xhr.upload.addEventListener("progress", function(e) {	
+				if (!e.lengthComputable) 
+					self.options.onProgress('Unable to compute progress.');	
 					
-					// Check if there is a file
-					if (!file)
-						_debug('No files in queue');
-	
-					if (file) {
-						if (self.options.method.toUpperCase() == 'PUT') {
-							xhr.setRequestHeader('X-File-Name', file.name);
-							xhr.setRequestHeader('X-File-Type', file.type);
-							xhr.setRequestHeader('X-File-Size', file.size);
-							xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-						}	
-					} 
-				},
-				success 	: function(data, textStatus, jqXHR) {
-					self.options.onSuccess(data, textStatus, jqXHR);
-						
-				},
-				error 		: function(jqXHR, textStatus, errorThrown) {
-					self.options.onError(jqXHR, textStatus, errorThrown);
-				},
-				complete 	: function(jqXHR, textStatus) {
-					
-					// Always call onComplete
-					self.options.onComplete(jqXHR, textStatus);	
-				}
-			});
+				self.options.onProgress(Math.round(e.loaded * 100 / e.total), e);				
+			}, false);
+			
+			// On success listener
+			xhr.addEventListener("load",  function(e) {
+				self.options.onSuccess(e.target.response, e.target.status, e);
+			}, false);
+			
+			// On error listener
+			xhr.addEventListener("error", function(e) {
+				self.options.onError(e.target.response, e.target.status, e);
+			}, false);
+			
+			// On cancelled listener 
+			xhr.addEventListener("abort", function(e) {
+				self.options.onCancelled(e.target.response, e.target.status, e);
+			}, false);
+			
+			// Open the request		
+			xhr.open(self.options.method.toUpperCase(), self.options.action);
+			
+			// Set headers if the method is PUT
+			if (self.options.method.toUpperCase() === 'PUT') {
+				if (data.name)
+					xhr.setRequestHeader('X-File-Name', data.name);
+			}
+			
+			// Allow beforeSend
+			self.options.beforeSend(data);
+			
+			// Send the request
+			xhr.send(data);
+		};
+		
+		/**
+		 * Clear the preview
+		 */
+		self.clearPreview = function() {
+			
+			if (self.options.preview)
+				self.options.preview.html('');			
+			
+			// Output debug info
+			_debug('Preview Cleared');
 		};
 		
 		/**

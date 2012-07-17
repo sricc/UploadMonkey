@@ -42,43 +42,47 @@ if(!file_exists($tmp_dir))
 	mkdir($tmp_dir, 0777, true);
 
 
-if (empty($_FILES)) {
-	$data = file_get_contents('php://input');
+switch ($_SERVER['REQUEST_METHOD']) {
 
-	$filename = (isset($_SERVER['HTTP_X_FILE_NAME']) ? $_SERVER['HTTP_X_FILE_NAME'] : false);
-
-	if ($filename) {
-		$ext = getFileExt($filename); 
+	case 'PUT' :
+	
+		if (empty($_FILES)) {
+			$data = file_get_contents('php://input');
+			
+			$filename = isset($_SERVER['HTTP_X_FILE_NAME']) ? $_SERVER['HTTP_X_FILE_NAME'] : false;
 		
-		$path = $tmp_dir . '/' . uniqid() . $ext;
-	
-		echo $data; exit;	
-
-		file_put_contents($path, $data);
-	
-		sendAjaxResponse(201, array('url'=>$path)); 
-	}
-} else {
-	$response = array();
-	$error 	  = array();
-
-	foreach ($_FILES as $key=>$value) {
-		$path = $tmp_dir . '/' . uniqid() . '.png';
-	
-		if (!is_writeable($tmp_dir)) {
-			echo "$tmp_dir not writeable\n";
-			exit;
-		}		
+			if ($filename) {
+				$ext = getFileExt($filename); 
+				
+				$path = $tmp_dir . '/' . uniqid() . $ext;
 		
-		if ($_FILES[$key]['error'] == UPLOAD_ERR_OK) {						
-			move_uploaded_file($_FILES[$key]['tmp_name'], $path)
-				? array_push($response, array('url'=>$path))
-				: array_push($error, array('error'=>'Error saving file: ' . $_FILES[$key]['name']));
+				file_put_contents($path, $data);
+			
+				sendAjaxResponse(201, array('url'=>$path)); 
+			}
 		}
-	}
-
-	(empty($error)) 
-		? sendAjaxResponse(201, array('success'=>true, 'url'=>$path))
-		: sendAjaxResponse(500, array('success'=>false, 'error'=>$error));
+		break;
+	case 'POST' :	
+		$response = array();
+		$error 	  = array();
+	
+		foreach ($_FILES as $key=>$value) {
+			$path = $tmp_dir . '/' . uniqid() . '.png';
 		
+			if (!is_writeable($tmp_dir)) {
+				echo "$tmp_dir not writeable\n";
+				exit;
+			}		
+			
+			if ($_FILES[$key]['error'] == UPLOAD_ERR_OK) {						
+				move_uploaded_file($_FILES[$key]['tmp_name'], $path)
+					? array_push($response, array('url'=>$path))
+					: array_push($error, array('error'=>'Error saving file: ' . $_FILES[$key]['name']));
+			}
+		}
+	
+		(empty($error)) 
+			? sendAjaxResponse(201, array('success'=>true, 'url'=>$path))
+			: sendAjaxResponse(500, array('success'=>false, 'error'=>$error));	
+
 }
