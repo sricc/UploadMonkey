@@ -28,7 +28,7 @@
 
 <ul>
 	<li><a href='#' id='upload'>Upload</a></li>
-    <li><a href='#' id='debugQueue'>Debug Queue</a></li>
+    <li><a href='#' id='getQueue'>Get Queue</a></li>
     <li><a href='#' id='clearPreview'>Clear Preview</a></li>
 	<li><a href='#' id='resetQueue'>Reset Queue</a></li>
 	<li><a href='#' id='resetDropzone'>Reset Dropzone</a></li>
@@ -59,7 +59,7 @@
 			dragDrop 		: true,
 			dropZone 		: $('#dropzone'),
 			dropZoneText 	: 'Drop files here...',
-			//preview 		: $('#preview'),
+			preview 		: $('#preview'),
 			queue 			: $('#list'),
 			showQueue  		: true,
 			queueOptions	 : {
@@ -86,7 +86,33 @@
 				$('#bar').val(percent);
 			}
 		});
-		
+	
+		/*
+		var upload = $('#dropzone').Upload({
+			debug 			: true,
+			auto 			: true,
+			multiple 		: true,
+			method 			: 'post',
+			dragDrop 		: true,
+			dropZone 		: $('#dropzone'),
+			dropZoneText 	: 'Drop files here...',
+			queue 			: $('#list'),
+			preview 		: $('#preview'),
+			showQueue  		: true,
+			action 			: 'http://www.upload.me.com/upload.php',
+			onSuccess 		: function(data, textStatus, jqXHR) {
+				console.log('onSuccess');
+				
+				console.log(data);
+				console.log(textStatus);
+			},
+			onError 		: function(data, textStatus) {
+				console.log('onError');	
+				
+				console.log(data);
+			}
+		});
+		*/
 		/*
 		var upload = $('#dropzone').Upload({
 			debug 			: true,
@@ -149,10 +175,10 @@
 			upload.clearPreview();
 		});
 	
-		$('#debugQueue').live('click', function(e) {			
+		$('#getQueue').live('click', function(e) {			
 			e.preventDefault();
 			
-			upload.debugQueue()
+			upload.getQueue()
 		});
 	
 	});

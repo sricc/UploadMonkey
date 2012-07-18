@@ -31,8 +31,9 @@
 	 * @return Upload object
 	 */
 	var Upload = function(element, opts) {
-		var self     = this;
-		var progress = {};
+		var self     	= this;
+		var progress 	= {};
+		var clonedInput = null; 
 
 		/**
 		 * The default options 
@@ -56,7 +57,7 @@
 			allowedExts 	 : null,
 			dropZone 		 : null,
 			dropZoneText	 : 'Drop files here...',
-			inputFile 		 : null,
+			fileInput 		 : null,
 			preview 		 : null,
 			dropZoneTextSize : '20px',
 			dzDragOverColor  : '#99CCFF',
@@ -87,6 +88,14 @@
 		 * The element that Upload is bound to
 		 */
 		self.element = null;
+		/**
+		 * The file input element 
+		 */
+		self.fileInput = null;
+		/**
+		 * The dropzone element 
+		 */
+		self.dropZone = null;
 		/**
 		 * Whether or not the browser supports HTML5 File API
 		 */
@@ -251,14 +260,15 @@
 			var files 	 = dt.files;
 
 			if (files.length > 0) {
-				var file = files[0];
-				
-				// Add file to the queue
-				self.queue.push(file);
-				
-				// Preview the image, if element is specified
-				if (self.options.preview)
-					_previewImage(file);
+				$.each(files, function(i, file) {
+									
+					// Add file to the queue
+					self.queue.push(file);
+					
+					// Preview the image, if element is specified
+					if (self.options.preview)
+						_previewImage(file);
+				});
 			}
 
 			// Build the queue
@@ -286,6 +296,18 @@
 		 */
 		var _init = function() {
 
+			// Ensure that only one file input is being assigned
+			if (self.options.inputFile && self.element.is('input')) {
+				_debug('Can not attach to an input and specify an input. Please choose one!');
+				return;
+			}
+			
+			// Ensure that only one dropzone is being assigned
+			if ((self.options.dragDrop && self.options.dropZone !== null) && self.element.is('div')) {
+				_debug('Can not attach to a dropzone and specify a dropzone. Please choose one!');
+				return;
+			}
+
 			// Output debug info
 			_debug('Options: ');
 			_debug(self.options);
@@ -299,7 +321,7 @@
 			self.supportsFileUpload = $.support.ajax;
 
 			// Initialize the form if an input is attached or specified
-			if (self.options.inputFile || self.element.is('input')) 
+			if (self.options.fileInput || self.element.is('input')) 
 				_initForm();
 
 			// Initialize drag and drop if a dropzone is attached or specified
@@ -311,53 +333,55 @@
 		/**
 		 * Drag and drop
 		 */
-		var _initDragDrop = function() {
+		var _initDragDrop = function(isReset) {
+			var reset = isReset || false;			
 						
 			// Set the dropzone
-			var dropZone = (self.element.is('div'))
+			self.dropZone = (self.element.is('div'))
 								? self.element
 								: self.options.dropZone;
 			
 			// Check if a dropzone was specified or if we are attached to a div
-			if (!dropZone) { 
+			if (!self.dropZone) { 
 				_debug('No dropZone specified, can not initialize.');
 				return;
 			}
 
 			// Clear html
-			dropZone.html('');
+			self.dropZone.html('');
 
 			// Build dropzone
-			dropZone.append('<span></span>')
+			self.dropZone.append('<span></span>')
 				.css('text-align', 'center')
 				.css('display', 'table-cell')
 				.css('vertical-align', 'middle');
 			
 			// Check if Drap and Drop is even possible
 			if ( _checkFileApi() ) {
-				dropZone.find('span')
+				self.dropZone.find('span')
 					.html(self.options.dropZoneText)
 					.addClass('dropzone-text')
 					.css('color','grey')
 					.css('top', '50%');
 	
-	
-				// Add events
-				var xhr = new XMLHttpRequest();
-				if (xhr.upload) {  
-					dropZone.live("dragover", 	_drapOver);  
-					dropZone.live("dragleave", 	_drapLeave);  
-					dropZone.live("drop", 		_drop);
-				};
+				if (! reset) {
+					// Add events
+					var xhr = new XMLHttpRequest();
+					if (xhr.upload) {  
+						self.dropZone.live("dragover", 	_drapOver);  
+						self.dropZone.live("dragleave",	_drapLeave);  
+						self.dropZone.live("drop", 		_drop);
+					};
+				}
 			} else {
 				
 				// Drag and Drop is not possible... let them know!
-				dropZone.find('span')
+				self.dropZone.find('span')
 					.html('Drag and Drop not supported! <br>Update your browser!!!')
 					.addClass('dropzone-text')
 					.css('color','white')
 					.css('top', '50%');
-				dropZone.css('background-color', 'red');
+				self.dropZone.css('background-color', 'red');
 			}
 		};
 		
@@ -366,27 +390,30 @@
 		 */
 		var _initForm = function() {
 			
-			var inputFile = self.element.is('input')
+			// Determine which input to use
+			self.inputFile = self.element.is('input')
 								? self.element
 								: self.options.inputFile;
 			
-			if (! inputFile.is('input') )
+			// Clone the input for later resets
+			clonedInput = self.inputFile.clone(true, true);
+			
+			if ( self.inputFile == null )
 				_debug('No <input> element found');
 			
 			// Bind on change event to the element if it's a form input
-			if (inputFile.is('input')) {
+			if ( self.inputFile.is('input') ) {
 				
-				inputFile.live('change', function(e) {
-					
-					_debug(this);					
+				self.inputFile.live('change', function(e) {
 					
 					// Check for IE 
+					
 					if ($.browser.msie) {
 					
 						// IE suspends timeouts until after the file dialog closes
 						setTimeout(function() {	
 							var file = {
-								name: self.element.val().split('\\').pop() 
+								name: self.inputFile.val().split('\\').pop() 
 							};				
 							
 							// Add files to the queue							
@@ -552,16 +579,11 @@
 			
 			
 			// Setup the form
-			if ( self.element.is('input') || self.options.inputFile !== null) {
-				
-				// Set the input element				
-				var input = self.element.is('input')
-								? self.element
-								: self.options.inputFile;
-				
+			if ( self.inputFile !== null) {
+							
 				// Wrap the input in a form if it isn't already
-				if (! input.isChildOf('form') ) 
-					input.wrap('<form>');
+				if (! self.inputFile.isChildOf('form') ) 
+					self.inputFile.wrap('<form>');
 				
 				// Set form attributes
 				var form = input.closest('form');
@@ -698,6 +720,9 @@
 			// Reset the queue
 			self.resetQueue();
 			
+			// Clear the preview
+			self.clearPreview();
+			
 			// Reset the dropzone
 			self.resetDropzone();
 			
@@ -714,7 +739,7 @@
 		self.resetDropzone = function() {
 			
 			// Reset the dropzone
-			_initDragDrop();
+			_initDragDrop(true);
 			
 			// Output debug info
 			_debug('Dropzone Reset');
@@ -724,22 +749,11 @@
 		 * Resets the input
 		 */
 		self.resetInput = function() {
-			var empty_input;
-			
-			// Reset the input if it's the one we are attached to
-			if (self.element.is('input')) {
-				empty_input = self.element.clone();
-				self.element.replaceWith(empty_input);		// Have to replace the input since it's read-only
-			}
-			
-			// Reset the input if it's specified
-			if (self.options.fileInput) {
-				if (self.options.fileInput.is('input')) {
-					empty_input = self.options.fileInput.clone();
-					self.options.fileInput.replaceWith(empty_input); // Have to replace the input since it's read-only
-				}
-			}
-			
+						
+			// Clear the input if we are attached or if one is specified
+			if (self.inputFile != null) 
+				self.inputFile.replaceWith(clonedInput);	// Have to replace the input since it's read-only
+						
 			// Output debug info
 			_debug('Input Reset');
 		};
@@ -762,7 +776,7 @@
 		/**
 		 * Show the queue
 		 */
-		self.debugQueue = function() {
+		self.getQueue = function() {
 			
 			// Output debug info
 			_debug('Queue: ')
