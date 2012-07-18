@@ -143,7 +143,7 @@
 				
 				// Set progress bar for PUT
 				if ( options.progressBar && (self.options.method.toUpperCase() === 'PUT') )
-					li += '<progress id="bar_' + i + '" max="100" value="0"></progress>';
+					li += '<progress id="bar_' + i + '" class="progress-bar" max="100" value="0"></progress>';
 				
 				li += '</li>';
 				
@@ -160,7 +160,7 @@
 				
 				// Set progress bar for POST
 				if ( self.options.method.toUpperCase() === 'POST' ) 				
-					self.options.queue.append($('<progress id="bar_filelist" max="100" value="0"></progress>'));
+					self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
 				
 				$('#queue_list').find('progress')
 					//.css('display', 'none')
@@ -376,7 +376,9 @@
 			// Bind on change event to the element if it's a form input
 			if (inputFile.is('input')) {
 				
-				inputFile.live('change', function(e) {					
+				inputFile.live('change', function(e) {
+					
+					_debug(this);					
 					
 					// Check for IE 
 					if ($.browser.msie) {
@@ -403,8 +405,10 @@
 						}, 0);
 					} else {
 						
+						_debug(e.target.files);
+						
 						// Add files to the queue
-						$.each(e.target.files, function(i, file) {
+						$.each(e.target.files, function(i, file) {							
 							self.queue.push(file);
 							
 							// Preview the image, if element is specified
@@ -576,35 +580,54 @@
 		 * Send a file via XHR Level 2 
 		 */
 		var _sendFileAjax = function() {
-				
-			_debug(self.queue);	
-				
+								
 			// Build the formData
 			var formData = new FormData();
 			$.each(self.queue, function(i, file) {
 				formData.append('file-'+i, file);				
 				
+				// If PUT, send each file separately
 				if (self.options.method.toUpperCase() === 'PUT') 
 					_sendXHR(file, i);
 			});
 			
+			// If POST, send the entire filelist at once
 			if (self.options.method.toUpperCase() === 'POST') 
 				_sendXHR(formData);
 		};
 		
+		/**
+		 * Make the XHR request
+		 *
+		 * @param file/filelist data the file or filelist to send
+		 * @param integer index the queue index of the file to send if it's a file (OPTIONAL)
+		 */
 		var _sendXHR = function(data, index) {
-			var progressName = (self.options.method.toUpperCase() === 'PUT')
+			
+			// If PUT ensure that an index was passed in
+			if ( (self.options.method.toUpperCase() === 'PUT') && (typeof index === 'undefined') ) 
+				_debug('PUT request requires queue index, progressBar will not work!');
+			
+			
+			// Set the progress bar name
+			var progressName = ( (self.options.method.toUpperCase() === 'PUT') && (typeof index !== 'undefined') )
 									? 'bar_' + index
 									: 'bar_filelist';
+			
+			// Select the element
 			var progressBar = $('#' + progressName);
-			progressBar.show();
+	
+			// Show the progress bar
+			if (progressBar)
+				progressBar.show();
 			
 			// Create request
 			var xhr = new XMLHttpRequest();
 			
 			// Upload progress listener
 			xhr.upload.addEventListener("progress", function(e) {
-				_debug(e);
+				
+				_debug(e);	
 					
 				if (!e.lengthComputable) 
 					self.options.onProgress('Unable to compute progress.');	
@@ -613,34 +636,31 @@
 				var total   	= e.totalSize || e.total;	
 				var percent 	= Math.round( loaded * 100 / total);			
 				
-				
-				_debug(progressBar);
-				
 				// Update the progress bar
-				progressBar.val(percent);
+				if (progressBar)
+					progressBar.val(percent);
 					
 				// Send back the progress	
 				self.options.onProgress(progressName, percent, e);				
 			}, false);
 			
 			// On success listener
-			xhr.addEventListener("load",  function(e) {				
+			xhr.addEventListener("load",  function(e) {
+				
+				// Clear the queue
+				self.queue.length = 0;
+								
 				self.options.onSuccess(e.target.response, e.target.status, e);
 			}, false);
 			
 			// On error listener
-			xhr.addEventListener("error", function(e) {				
+			xhr.addEventListener("error", function(e) {		
+				
+				// Clear the queue
+				self.queue.length = 0;
+					
 				self.options.onError(e.target.response, e.target.status, e);
 			}, false);
-			
-			// On cancelled listener 
-			xhr.addEventListener("abort", function(e) {				
-				self.options.onCancelled(e.target.response, e.target.status, e);
-			}, false);
-			
-			xhr.onreadystatechange = function(e) {
-				//_debug(e);
-			};
 			
 			// Open the request		
 			xhr.open(self.options.method.toUpperCase(), self.options.action);
@@ -720,9 +740,6 @@
 				}
 			}
 			
-			// Reset the dropzone
-			_initForm();
-			
 			// Output debug info
 			_debug('Input Reset');
 		};
@@ -733,11 +750,21 @@
 		self.resetQueue = function() {
 			
 			// Clear the queue
-			self.queue = [];
+			self.queue.length = 0;
 			self.options.queue.html('');
 			
 			// Output debug info
 			_debug('Queue reset');
+			_debug('Queue: ')
+			_debug(self.queue);
+		};
+		
+		/**
+		 * Show the queue
+		 */
+		self.debugQueue = function() {
+			
+			// Output debug info
 			_debug('Queue: ')
 			_debug(self.queue);
 		};
