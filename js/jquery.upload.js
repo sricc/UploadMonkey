@@ -51,6 +51,7 @@
 				lastModified : true,
 				progressBar	 : true
 			},
+			resizeMax		 : null,
 			auto 	  		 : true,
 			debug 	  		 : true,
 			dragDrop  		 : true,
@@ -544,12 +545,44 @@
 					// Create the image
 					var image 	= $('<img\>');
 					image.attr('src', result);
-					image.attr('alt', '');
-						
+					image.attr('alt', ' ');
+					
+					// Resize the image if specified in the options
+					if (self.options.resizeMax !== null) {
+						image.load(function() {
+							_debug(this);
+							_resizeImage(this);
+						});
+					}
+				
+					//image.css({width: self.options.resize.width, height: self.options.resize.height});
+		
 					// Add image to the preview element	
 					preview.append(image);	
 				}	
 			}
+		};
+		
+		/**
+		 * Resize an image keeping the aspect ratio
+		 *
+		 * @param object the image to resize
+		 */
+		var _resizeImage = function(image) {			
+			var max_size = self.options.resizeMax;
+			
+			// Set the height
+			var h = (image.height > image.width)
+						? max_size
+						: Math.ceil(image.height / image.width * max_size);
+			
+			// Set the width			
+			var w = (image.height > image.width)
+						? Math.ceil(image.width / image.height * max_size)
+						: max_size;
+			
+			// Apply the resize via CSS
+			$(image).css({ height: h, width: w });	
 		};
 		
 		/**
