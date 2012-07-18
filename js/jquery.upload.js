@@ -34,6 +34,7 @@
 		var self     	= this;
 		var progress 	= {};
 		var clonedInput = null; 
+		var i = 0;
 
 		/**
 		 * The default options 
@@ -395,11 +396,15 @@
 								? self.element
 								: self.options.inputFile;
 			
-			// Clone the input for later resets
-			clonedInput = self.inputFile.clone(true, true);
-			
+			// Check if an inputFile is set
 			if ( self.inputFile == null )
 				_debug('No <input> element found');
+			
+			// Add custom data attribute (really don't want to do this, but only way I can get a reference after resetting the input
+			self.inputFile.addClass('upload-input');
+			
+			// Clone the input for later resets
+			clonedInput = self.inputFile.outerHtml();
 			
 			// Bind on change event to the element if it's a form input
 			if ( self.inputFile.is('input') ) {
@@ -701,18 +706,6 @@
 		};
 		
 		/**
-		 * Clear the preview
-		 */
-		self.clearPreview = function() {
-			
-			if (self.options.preview)
-				self.options.preview.html('');			
-			
-			// Output debug info
-			_debug('Preview Cleared');
-		};
-		
-		/**
 		 * Resets the queue, input and dropzone
 		 */
 		self.reset = function() {
@@ -721,7 +714,7 @@
 			self.resetQueue();
 			
 			// Clear the preview
-			self.clearPreview();
+			self.resetPreview();
 			
 			// Reset the dropzone
 			self.resetDropzone();
@@ -748,12 +741,15 @@
 		/**
 		 * Resets the input
 		 */
-		self.resetInput = function() {
-						
+		self.resetInput = function() {								
+								
 			// Clear the input if we are attached or if one is specified
 			if (self.inputFile != null) 
 				self.inputFile.replaceWith(clonedInput);	// Have to replace the input since it's read-only
-						
+			
+			// Reset the inputFile
+			self.inputFile = $('.upload-input');
+									
 			// Output debug info
 			_debug('Input Reset');
 		};
@@ -771,6 +767,18 @@
 			_debug('Queue reset');
 			_debug('Queue: ')
 			_debug(self.queue);
+		};
+		
+		/**
+		 * Reset the preview
+		 */
+		self.resetPreview = function() {
+			
+			if (self.options.preview)
+				self.options.preview.html('');			
+			
+			// Output debug info
+			_debug('Preview Cleared');
 		};
 		
 		/**

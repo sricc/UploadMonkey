@@ -29,7 +29,7 @@
 <ul>
 	<li><a href='#' id='upload'>Upload</a></li>
     <li><a href='#' id='getQueue'>Get Queue</a></li>
-    <li><a href='#' id='clearPreview'>Clear Preview</a></li>
+    <li><a href='#' id='resetPreview'>Reset Preview</a></li>
 	<li><a href='#' id='resetQueue'>Reset Queue</a></li>
 	<li><a href='#' id='resetDropzone'>Reset Dropzone</a></li>
     <li><a href='#' id='resetInput'>Reset Input</a></li>
@@ -38,7 +38,7 @@
 
 <div id="list"></div>
 
-<div id="progress"><progress id="bar" max="100" value="0"></progress></div>
+<!--<div id="progress"><progress id="bar" max="100" value="0"></progress></div>-->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
 <script src="js/jquery.upload.js" type="text/javascript"></script> 
@@ -169,10 +169,10 @@
 			upload.resetInput();
 		});
 		
-		$('#clearPreview').live('click', function(e) {			
+		$('#resetPreview').live('click', function(e) {			
 			e.preventDefault();
 
-			upload.clearPreview();
+			upload.resetPreview();
 		});
 	
 		$('#getQueue').live('click', function(e) {			
