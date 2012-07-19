@@ -1,4 +1,8 @@
 <?
+/**
+ * Simple upload script to demonstrate accepting file uploades with PHP
+ */
+
 
 /**
  * Sends an AJAX response
@@ -34,8 +38,9 @@ function getFileExt($path) {
 				: NULL;
 }
 
-//sendAjaxResponse(500, 'Error');
-
+/**
+ * Entry point
+ */
 $tmp_dir = '/tmp/images';
 
 if(!file_exists($tmp_dir)) 

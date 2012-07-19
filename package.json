@@ -1,0 +1,28 @@
+{
+  "name": "upload",
+  "title": "upload",
+  "description": "jQuery File Upload Plugin",
+  "version": "0.0.1",
+  "homepage": "",
+  "author": {
+    "name": "Steve Ricciardelli"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stevericc/upload.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stevericc/upload/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/MIT"
+	}
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "jquery": ">=1.7.0",
+  },
+  "keywords": []
+}
