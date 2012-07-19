@@ -70,7 +70,7 @@
 			onSuccess 		 : function(data, textStatus, jqXHR) {},
 			onError 		 : function(jqXHR, textStatus, errorThrown) {},
 			onProgress 	 	 : function(progressBarId, percent, xhr) {},
-			beforeSend 		 : function(xhr) {}
+			beforeSend 		 : function(data, xhr) {}
 		};
 
 		/**
@@ -764,7 +764,7 @@
 			}
 			
 			// Allow beforeSend
-			self.options.beforeSend(data);
+			self.options.beforeSend(data, xhr);
 			
 			// Send the request
 			xhr.send(data);
