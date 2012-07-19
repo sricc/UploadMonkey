@@ -1,12 +1,62 @@
 # Upload
 
+A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  The plugin will fallback to the old iFrame hack if the browser doesn't support XHR (i.e. IE).  If the upload method is set to POST all files will be uploaded as one single request.  If the upload method is set to PUT each file will be uploaded separately.  
+
+---
+
+## Usage
+
+Given a simple html file.
+
+	<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		<div id="dropzone" class="uploadable"></div>
+
+		<input type="file" name='file' id="files" name="files[]" />
+
+		<div id="preview"></div>
+		
+		<div id="queue"></div>
+	</body>
+	</html>
+
+You can attach the upload plugin multiple ways, but in it's simpiest form just bind it to a file input or drag and drop dropzone.
+	
+	var upload = $('#files').Upload(options);
+	
+or
+
+	var upload = $('#dropzone').Upload(options);
+
+You can also specify a drag and drop dropzone while it is bound to a file input.
+
+	var upload = $('#files').Upload({
+			dragDrop 		: true,
+			dropZone 		: $('#dropzone'),
+			dropZoneText 	: 'Drop files here...',
+			action 			: 'http://www.upload.me.com/upload.php',
+			}
+		});
+
+You can also do the reverse, bind it to a drag and drop dropzone and specify a file input.
+
+	var upload = $('#dropzone').Upload({
+			fileInput		: $('#files'),
+			dragDrop 		: true,
+			dropZoneText 	: 'Drop files here...',
+			action 			: 'http://www.upload.me.com/upload.php',
+			}
+		});
 
 ---
 
 
 ## Options
 
-Upload was designed to be as flexible as possible, so below are the possible options.
+Upload was designed to be as flexible as possible but still completely functional.
 
 ### Debugging 
 
