@@ -31,10 +31,10 @@
 	 * @return Upload object
 	 */
 	var Upload = function(element, opts) {
-		var self     	= this;
-		var progress 	= {};
+		var self        = this;
+		var progress    = {};
 		var clonedInput = null; 
-		var i = 0;
+		var i           = 0;
 
 		/**
 		 * The default options 
@@ -55,8 +55,7 @@
 			auto 	  		 : true,
 			debug 	  		 : true,
 			dragDrop  		 : true,
-			fileType	 	 : 'image',
-			allowedExts 	 : null,
+			allowedTypes 	 : null,
 			dropZone 		 : null,
 			dropZoneText	 : 'Drop files here...',
 			fileInput 		 : null,
@@ -119,7 +118,7 @@
 			// Output debug info
 			_debug('Queue: ');
 			_debug(self.queue);
-	
+			
 			var output = [];
 			
 			// loop through the array and build the html
@@ -157,10 +156,9 @@
 				
 				// Build the output html
 				output.push(li);
-				
 			}
 			
-			// Set the html in the qeue
+			// Set the html in the queue
 			self.options.queue.html('<ul id="queue_list">' + output.join('') + '</ul>');
 			
 			// Set progress bar 
@@ -171,15 +169,13 @@
 					self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
 				
 				$('#queue_list').find('progress')
-					//.css('display', 'none')
 					.css('margin-left', '7px');
 			}
 
 			// Check if the queue should be shown	
 			self.options.showQueue
 				? self.options.queue.show()
-				: self.options.queue.hide();
-		
+				: self.options.queue.hide();	
 		};	
 		
 		/**
@@ -294,7 +290,7 @@
 							_debug('File limit of ' + self.options.fileLimit + ' has been reached. The queue is full!');
 							return false; 
 						}						
-										
+						
 						// Add file to the queue
 						self.queue.push(file);
 						
@@ -438,6 +434,9 @@
 			self.fileInput = self.element.is('input')
 								? self.element
 								: self.options.inputFile;
+								
+			if (self.options.allowedTypes)
+				self.fileInput.attr('accept', self.options.allowedTypes);
 			
 			// Check if an inputFile is set
 			if ( (self.fileInput == null) || !self.fileInput.is('input') )
@@ -544,7 +543,7 @@
 				_debug('Response was not valid JSON');
 			
 			// Remove the iFrame
-			//$(this).remove();
+			$(this).remove();
 		};
 		
 		/**
@@ -636,7 +635,7 @@
 					iframe = $('<iframe/>', {
 						name 	: id,
 						id 		: id ,
-						'class'	: 'hidden', 		// Need to use quotes here since it's a Javascript reserved word and of course IE will choke
+						'class'	: 'hidden', // Need to use quotes here since it's a Javascript reserved word and of course IE will choke
 						src  	: '',
 						width	: 0, 
 						height	: 0,
@@ -741,8 +740,12 @@
 				
 				// Clear the queue
 				self.queue.length = 0;
-								
+						
+				// Call onSuccess				
 				self.options.onSuccess(e.target.response, e.target.status, e);
+				
+				// Always call onComplete
+				self.options.onComplete(data, data.success.toString());
 			}, false);
 			
 			// On error listener
@@ -751,7 +754,11 @@
 				// Clear the queue
 				self.queue.length = 0;
 					
+				// Call onError	
 				self.options.onError(e.target.response, e.target.status, e);
+				
+				// Always call onComplete
+				self.options.onComplete(data, data.success.toString());
 			}, false);
 			
 			// Open the request		

@@ -58,6 +58,7 @@
 			multiple 		: true,
 			method 			: 'put',
 			dragDrop 		: true,
+			allowedTypes 	: 'image/jpg, image/png',
 			dropZone 		: $('#dropzone'),
 			dropZoneText 	: 'Drop files here...',
 			preview 		: $('#preview'),
@@ -65,9 +66,9 @@
 			showQueue  		: true,
 			queueOptions	 : {
 				name 	 	 : true,
-				type 	 	 : false,
-				size 	 	 : false,
-				lastModified : false,
+				type 	 	 : true,
+				size 	 	 : true,
+				lastModified : true,
 				progressBar	 : true	
 			},
 			resizeMax		: '150px',
