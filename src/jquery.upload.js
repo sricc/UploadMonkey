@@ -40,36 +40,37 @@
 		 * The default options 
 		 */
 		var _defaultOptions = {
-			fileLimit		 : 0,
-			multiple 		 : false,
-			queue 			 : null,
-			showQueue 		 : true,
-			queueOptions	 : {
-				name 	 	 : true,
-				type 	 	 : true,
-				size 	 	 : true,
-				lastModified : true,
-				progressBar	 : true
+			fileLimit		 	: 0,
+			multiple 		 	: false,
+			queue 				: null,
+			showQueue 		 	: true,
+			queueOptions	 	: {
+				name 	 	 	: true,
+				type 	 	 	: true,
+				size 	 	 	: true,
+				lastModified 	: true,
+				progressBar	 	: true
 			},
-			resizeMax		 : null,
-			auto 	  		 : true,
-			debug 	  		 : true,
-			dragDrop  		 : true,
-			allowedTypes 	 : null,
-			dropZone 		 : null,
-			dropZoneText	 : 'Drop files here...',
-			fileInput 		 : null,
-			preview 		 : null,
-			dropZoneTextSize : '20px',
-			dzDragOverColor  : '#99CCFF',
-			sizeLimit		 : 0,
-			method 			 : 'post',
-			action 			 : 'upload.php',
-			onComplete		 : function(jqXHR, textStatus) {},
-			onSuccess 		 : function(data, textStatus, jqXHR) {},
-			onError 		 : function(jqXHR, textStatus, errorThrown) {},
-			onProgress 	 	 : function(progressBarId, percent, xhr) {},
-			beforeSend 		 : function(data, xhr) {}
+			resizeMax		 	: null,
+			auto 	  		 	: true,
+			debug 	  		 	: true,
+			dragDrop  		 	: true,
+			fileType	 	 	: 'image',
+			allowedExts 	 	: null,
+			dropZone 		 	: null,
+			dropZoneText	 	: 'Drop files here...',
+			fileInput 		 	: null,
+			preview 		 	: null,
+			dropZoneTextSize 	: '20px',
+			dzDragOverColor  	: '#99CCFF',
+			sizeLimit		 	: 0,
+			method 			 	: 'post',
+			action 			 	: 'upload.php',
+			onComplete		 	: function(jqXHR, textStatus) {},
+			onSuccess 		 	: function(data, textStatus, jqXHR) {},
+			onError 		 	: function(jqXHR, textStatus, errorThrown) {},
+			onProgress 	 	 	: function(progressBarId, percent, xhr) {},
+			beforeSend 		 	: function(data, xhr) {}
 		};
 
 		/**
@@ -247,7 +248,7 @@
 		/**
 		 * Drag leave
 		 */
-		var _drapLeave = function(e) {
+		var _dragLeave = function(e) {
 			_ignoreDrag(e);
 			
 			// Change background color back to white
@@ -257,7 +258,7 @@
 		/**
 		 * Drag over
 		 */
-		var _drapOver = function(e) {
+		var _dragOver = function(e) {
 			_ignoreDrag(e);
 			
 			// Change background color 
@@ -408,8 +409,8 @@
 					// Add events
 					var xhr = new XMLHttpRequest();
 					if (xhr.upload) {  
-						self.dropZone.live("dragover", 	_drapOver);  
-						self.dropZone.live("dragleave",	_drapLeave);  
+						self.dropZone.live("dragover", 	_dragOver);  
+						self.dropZone.live("dragleave",	_dragLeave);  
 						self.dropZone.live("drop", 		_drop);
 					};
 				}
