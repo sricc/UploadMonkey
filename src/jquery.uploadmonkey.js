@@ -6,8 +6,8 @@
 	 * @param object the options object
 	 * @return object the plugin object
 	 */
-	$.fn.Upload = function(options) {
-		return new Upload(this, options);
+	$.fn.UploadMonkey = function(options) {
+		return new UploadMonkey(this, options);
 	};
 	
 	/**
@@ -30,7 +30,7 @@
 	 * @param object opts the options object
 	 * @return Upload object
 	 */
-	var Upload = function(element, opts) {
+	var UploadMonkey = function(element, opts) {
 		var self        = this;
 		var progress    = {};
 		var clonedInput = null; 
@@ -733,7 +733,7 @@
 					progressBar.val(percent);
 					
 				// Send back the progress	
-				self.options.onProgress(progressName, percent, e);				
+				self.options.onComplete(e.target.response, e.target.status, e);				
 			}, false);
 			
 			// On success listener
@@ -746,7 +746,7 @@
 				self.options.onSuccess(e.target.response, e.target.status, e);
 				
 				// Always call onComplete
-				self.options.onComplete(data, data.success.toString());
+				self.options.onComplete(e.target.response, e.target.status, e);
 			}, false);
 			
 			// On error listener
@@ -759,7 +759,7 @@
 				self.options.onError(e.target.response, e.target.status, e);
 				
 				// Always call onComplete
-				self.options.onComplete(data, data.success.toString());
+				self.options.onComplete(e.target.response, e.target.status, e);
 			}, false);
 			
 			// Open the request		
