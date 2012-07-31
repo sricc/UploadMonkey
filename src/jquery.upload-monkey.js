@@ -10,21 +10,21 @@
 		return new UploadMonkey(this, options);
 	};
 	
-	/**
+	/** 
 	 * Extend jQuery to add custom methods
-	 */ 
+	 */
 	$.extend($.fn, {
 		isChildOf:  function(parent) {
 			return $(this).parents().filter(parent).length>0;
 		},
 		outerHtml: function() {
-			return $(this).clone().wrap('<div>').parent().html();	
+			return $(this).clone().wrap('<div>').parent().html();
 		}
 	});
 	
 	
 	/**
-	 * Upload object 
+	 * Upload object
 	 *
 	 * @param DOM element the DOM element that this plugin is bound to
 	 * @param object opts the options object
@@ -33,44 +33,44 @@
 	var UploadMonkey = function(element, opts) {
 		var self        = this;
 		var progress    = {};
-		var clonedInput = null; 
+		var clonedInput = null;
 		var i           = 0;
 
 		/**
 		 * The default options 
 		 */
 		var _defaultOptions = {
-			fileLimit		 	: 0,
-			multiple 		 	: false,
-			queue 				: null,
-			showQueue 		 	: true,
-			queueOptions	 	: {
-				name 	 	 	: true,
-				type 	 	 	: true,
-				size 	 	 	: true,
-				lastModified 	: true,
-				progressBar	 	: true
-			},
-			resizeMax		 	: null,
-			auto 	  		 	: true,
-			debug 	  		 	: true,
-			dragDrop  		 	: true,
-			fileType	 	 	: 'image',
-			allowedExts 	 	: null,
-			dropZone 		 	: null,
-			dropZoneText	 	: 'Drop files here...',
-			fileInput 		 	: null,
-			preview 		 	: null,
-			dropZoneTextSize 	: '20px',
-			dzDragOverColor  	: '#99CCFF',
-			sizeLimit		 	: 0,
-			method 			 	: 'post',
-			action 			 	: 'upload.php',
-			onComplete		 	: function(jqXHR, textStatus) {},
-			onSuccess 		 	: function(data, textStatus, jqXHR) {},
-			onError 		 	: function(jqXHR, textStatus, errorThrown) {},
-			onProgress 	 	 	: function(progressBarId, percent, xhr) {},
-			beforeSend 		 	: function(data, xhr) {}
+				fileLimit			: 0,
+				multiple			: false,
+				queue				: null,
+				showQueue			: true,
+				queueOptions		: {
+					name			: true,
+					type			: true,
+					size			: true,
+					lastModified	: true,
+					progressBar		: true
+				},
+				resizeMax			: null,
+				auto				: true,
+				debug				: true,
+				dragDrop			: true,
+				fileType			:'image',
+				allowedExts			: null,
+				dropZone			: null,
+				dropZoneText		: 'Drop files here...',
+				fileInput			: null,
+				preview				: null,
+				dropZoneTextSize	: '20px',
+				dzDragOverColor		: '#99CCFF',
+				sizeLimit			: 0,
+				method				: 'post',
+				action				: 'upload.php',
+				onComplete			: function(jqXHR, textStatus) {},
+				onSuccess			: function(data, textStatus, jqXHR) {},
+				onError				: function(jqXHR, textStatus, errorThrown) {},
+				onProgress			: function(progressBarId, percent, xhr) {},
+				beforeSend			: function(data, xhr) {}
 		};
 
 		/**
@@ -162,7 +162,7 @@
 			// Set the html in the queue
 			self.options.queue.html('<ul id="queue_list">' + output.join('') + '</ul>');
 			
-			// Set progress bar 
+			// Set progress bar
 			if ( options.progressBar ) {
 				
 				// Set progress bar for POST
@@ -173,7 +173,7 @@
 					.css('margin-left', '7px');
 			}
 
-			// Check if the queue should be shown	
+			// Check if the queue should be shown
 			self.options.showQueue
 				? self.options.queue.show()
 				: self.options.queue.hide();	

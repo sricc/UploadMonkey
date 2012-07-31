@@ -1,4 +1,4 @@
-# Upload-Monkey
+# Upload Monkey
 
 A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  The plugin will fallback to the old iFrame hack if the browser doesn't support XHR (i.e. IE).  If the upload method is set to POST all files will be uploaded as one single request.  If the upload method is set to PUT each file will be uploaded separately.  
 
@@ -125,9 +125,8 @@ Upload was designed to be as flexible as possible but still completely functiona
 * **onComplete**		- callback for when the request is complete (will always be called, regardless of sucess or error)
 	* jqXHR - the xhr request
 	* textStatus  	
-
-		function(jqXHR, textStatus) {}
-
+        
+        function(jqXHR, textStatus) {}
 
 * **onSuccess** 		- callback for when the request is completed successfully
 

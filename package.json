@@ -2,7 +2,7 @@
   "name": "upload",
   "title": "upload",
   "description": "jQuery File Upload Plugin",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "",
   "author": {
     "name": "Steve Ricciardelli"
