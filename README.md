@@ -146,7 +146,7 @@ Upload was designed to be as flexible as possible but still completely functiona
 		
 ## MIT License
 ------------
-Copyright (c) 2012 Steve Ricciardelli <steve@yhmg.com>
+Copyright (c) 2012 Steve Ricciardelli <stephen.j.ricciardelli@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
