@@ -77,7 +77,7 @@ Upload was designed to be as flexible as possible but still completely functiona
 
 * **fileLimit**			- the number of files that can be uploaded
 * **fileType** 			- the mime-type of the files being uploaded (ex. 'image')
-* **allowedExts** 		- defaults to null, meaning there is no extension filter (['jpg', 'jpeg', 'png'])
+* **allowedTypes** 		- defaults to null, meaning there is no type filter ('image/jpg, image/jpeg, image/png')
 * **multiple** 			- whether or not multiple files can be uploaded with the file input
 * **sizeLimit**			- the size limit of the files to upload, 0 is default and means unlimited
 
