@@ -3,14 +3,14 @@
 	/**
 	 * Constructor (expose Upload)
 	 *
-	 * @param object the options object
-	 * @return object the plugin object
+	 * @param {object} options	The options object
+	 * @return {object}			An UploadMonkey object
 	 */
 	$.fn.UploadMonkey = function(options) {
 		return new UploadMonkey(this, options);
 	};
 	
-	/** 
+	/**
 	 * Extend jQuery to add custom methods
 	 */
 	$.extend($.fn, {
@@ -26,9 +26,9 @@
 	/**
 	 * Upload object
 	 *
-	 * @param DOM element the DOM element that this plugin is bound to
-	 * @param object opts the options object
-	 * @return Upload object
+	 * @param {element} element The DOM element that this plugin is bound to
+	 * @param {object} opts		The options object
+	 * @return {UploadMonkey}	An UploadMonkey object
 	 */
 	var UploadMonkey = function(element, opts) {
 		var self        = this;
@@ -37,7 +37,7 @@
 		var i           = 0;
 
 		/**
-		 * The default options 
+		 * The default options
 		 */
 		var _defaultOptions = {
 				fileLimit			: 0,
@@ -56,7 +56,7 @@
 				debug				: true,
 				dragDrop			: true,
 				fileType			:'image',
-				allowedExts			: null,
+				allowedTypes		: null,
 				dropZone			: null,
 				dropZoneText		: 'Drop files here...',
 				fileInput			: null,
@@ -78,23 +78,23 @@
 		 */
 		self.version = "0.0.1";
 		/**
-		 * Private data store, containing all of the settings objects 
+		 * Private data store, containing all of the settings objects
 		 */
 		self.options = {},
 		/**
 		 * Private data store, containing all the files to upload
 		 */
-		self.queue 	= [],
+		self.queue	= [],
 		/**
 		 * The element that Upload is bound to
 		 */
 		self.element = null;
 		/**
-		 * The file input element 
+		 * The file input element
 		 */
 		self.fileInput = null;
 		/**
-		 * The dropzone element 
+		 * The dropzone element
 		 */
 		self.dropZone = null;
 		/**
@@ -106,13 +106,39 @@
 		self.options = $.extend(_defaultOptions, opts || {});
 
 		// Set the element that this plugin is bound to
-  		self.element = element;
+		self.element = element;
 
 		/**
-	 	 * Builds the queue
-	 	 *
-	 	 * @param array the array of files that were selected
-	 	 */
+		 * Add a file to the queue
+		 *
+		 * @param {object} file The file object from FileList
+		 */
+		var _addToQueue = function(file) {
+
+			// Check if the fileLimit has been reached
+			if (!_checkFileLimit()) {
+				_debug('File limit of ' + self.options.fileLimit + ' has been reached. The queue is full!');
+				return;
+			}
+
+			// Check file type
+			if (_checkFileType(file)) {
+
+				// Add file to the queue
+				self.queue.push(file);
+				
+				// Preview the image, if element is specified
+				if (self.options.preview)
+					_previewImage(file);
+			} else
+				_debug('File (' + file.name + ') type ' + file.type + ' is not allowed.  Ignoring the file.');
+		};
+
+		/**
+		 * Builds the queue
+		 *
+		 * @param {array} the array of files that were selected
+		 */
 		var _buildQueueHtml = function() {
 			var options = self.options.queueOptions;
 			
@@ -123,7 +149,7 @@
 			var output = [];
 			
 			// loop through the array and build the html
-			for (var i = 0, file; file = self.queue[i]; i++) {		  
+			for (var i = 0, file; file = self.queue[i]; i++) {
 				
 				// Create element
 				var li = '<li><span>';
@@ -166,7 +192,7 @@
 			if ( options.progressBar ) {
 				
 				// Set progress bar for POST
-				if ( self.options.method.toUpperCase() === 'POST' ) 				
+				if ( self.options.method.toUpperCase() === 'POST' )
 					self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
 				
 				$('#queue_list').find('progress')
@@ -176,23 +202,23 @@
 			// Check if the queue should be shown
 			self.options.showQueue
 				? self.options.queue.show()
-				: self.options.queue.hide();	
-		};	
+				: self.options.queue.hide();
+		};
 		
 		/**
 		 * Convert number of bytes into human readable format
 		 *
 		 * reference: http://codeaid.net/javascript/convert-size-in-bytes-to-human-readable-format-(javascript)
 		 *
-		 * @param integer bytes     Number of bytes to convert
-		 * @param integer precision Number of digits after the decimal separator
-		 * @return string
+		 * @param	{integer} bytes     Number of bytes to convert
+		 * @param	{integer} precision Number of digits after the decimal separator
+		 * @return	{string}		    The human readable string
 		 */
-		var _bytesToSize = function(bytes, precision) {  			
+		var _bytesToSize = function(bytes, precision) {
 			var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 			var posttxt = 0;
 			
-			if (bytes == 0) 
+			if (bytes === 0)
 				return 'n/a';
 			
 			while( bytes >= 1024 ) {
@@ -201,13 +227,13 @@
 			}
 			
 			return Number(bytes).toFixed(precision) + " " + sizes[posttxt];
-		}
+		};
 		
 		/**
 		 * Check if the browser supports HTML5 File API
 		 */
-		var _checkFileApi = function() {	
-			return (typeof FileReader === "undefined") 
+		var _checkFileApi = function() {
+			return (typeof FileReader === "undefined")
 						? false
 						: true;
 		};
@@ -215,12 +241,12 @@
 		/**
 		 * Check if the file limit has been reached
 		 *
-		 * @return boolean TRUE if within the fileLimit, FALSE if the limit has been exceeded
+		 * @return {boolean} TRUE if within the fileLimit, FALSE if the limit has been exceeded
 		 */
 		var _checkFileLimit = function() {
 			
 			// Check if the number of files selected where over the limit or is set to zero (unlimited)
-			if( self.queue.length >= self.options.fileLimit && self.options.fileLimit != 0) 
+			if( self.queue.length >= self.options.fileLimit && self.options.fileLimit !== 0)
 				return false;
 			
 			return true;
@@ -229,16 +255,41 @@
 		/**
 		 * Check if the browser supports FormData, part of XHR Level 2
 		 */
-		var _checkFileUpload = function() { 
-			return (typeof(window.FormData) === 'undefined') 
+		var _checkFileUpload = function() {
+			return (typeof(window.FormData) === 'undefined')
 				? false
 				: true;
+		};
+
+		/**
+		 * Checks if the file type is allowed
+		 *
+		 * @param  {object} $file  The file object from FileList
+		 * @return {boolean}       TRUE if the file is allowed, FALSE otherwise
+		 */
+		var _checkFileType = function(file) {
+			if (! self.options.allowedTypes )
+				return true;
+
+			// Get allowed types from options
+			var types = self.options.allowedTypes.split(',');
+			$.each(types, function(i, type) {
+				types[i] = $.trim(type);
+			});
+
+			// Output debug info
+			_debug('Allowed file types: ');
+			_debug(types);
+
+			return ($.inArray(file.type, types) > -1)
+				? true
+				: false;
 		};
 		
 		/**
 		 * Output debug info
 		 *
-		 * @param mixed output whatever you want to output
+		 * @param {mixed} output Whatever you want to output
 		 */
 		var _debug = function(output) {
 			if (self.options.debug)
@@ -247,26 +298,33 @@
 		
 		/**
 		 * Drag leave
+		 *
+		 * @param  {event} e The event
 		 */
 		var _dragLeave = function(e) {
 			_ignoreDrag(e);
 			
 			// Change background color back to white
 			$(this).css('background-color', '#FFF');
-		}
+		};
 		
 		/**
 		 * Drag over
+		 *
+		 * @param  {event} e The event
 		 */
 		var _dragOver = function(e) {
 			_ignoreDrag(e);
 			
-			// Change background color 
+			// Change background color
 			$(this).css('background-color', self.options.dzDragOverColor);
-		}
+		};
 
 		/**
 		 * Drop event
+		 *
+		 * @param  {event} e	The event
+		 * @return {boolean}	FALSE to preventDefaults and stop bubbling
 		 */
 		var _drop = function(e) {
 			var dropZone = self.options.dropZone;
@@ -275,50 +333,20 @@
 			$(this).css('background-color', '#FFF');
 			
 			// Get the dropped file
-			var dt 		 = e.originalEvent.dataTransfer;
-			var files 	 = dt.files;
+			var dt		= e.originalEvent.dataTransfer;
+			var files	= dt.files;
 
 			if (files.length > 0) {
-				
-				// Check if multiple is enabled
 				if (self.options.multiple) {
-					
-					// Add all files that were dropped
 					$.each(files, function(i, file) {
-									
-						// Stop if the fileLimit has been reached			
-						if (!_checkFileLimit()) {
-							_debug('File limit of ' + self.options.fileLimit + ' has been reached. The queue is full!');
-							return false; 
-						}						
-						
-						// Add file to the queue
-						self.queue.push(file);
-						
-						// Preview the image, if element is specified
-						if (self.options.preview)
-							_previewImage(file);
+						_addToQueue(file);
 					});
-				} else {
-					var file = files[0];
-					
-					// Stop if the fileLimit has been reached			
-					if (!_checkFileLimit()) {
-						_debug('File limit of ' + self.options.fileLimit + ' has been reached. The queue is full!');
-						return false; 
-					}
-					
-					// Add file to the queue
-					self.queue.push(file);
-					
-					// Preview the image, if element is specified
-					if (self.options.preview)
-						_previewImage(file);
-				}
+				} else
+					_addToQueue(files[0]);
 			}
 
 			// Build the queue
-		   	_buildQueueHtml();
+			_buildQueueHtml();
 				
 			// If options.auto is set, upload the file instantly
 			if (self.options.auto)
@@ -329,10 +357,13 @@
 		
 		/**
 		 * Ignore the drag events
+		 *
+		 * @param  {event} e	The event
+		 * @return {boolean}	FALSE to preventDefaults and stop bubbling
 		 */
 		var _ignoreDrag = function(e) {
-			e.stopPropagation();  
-		    e.preventDefault();  
+			e.stopPropagation();
+		    e.preventDefault();
 
 		    return false; // Needed for IE, of course
 		};
@@ -362,20 +393,22 @@
 			self.supportsFileUpload = _checkFileUpload();
 
 			// Initialize the form if an input is attached or specified
-			if (self.options.fileInput || self.element.is('input')) 
+			if (self.options.fileInput || self.element.is('input'))
 				_initForm();
 
 			// Initialize drag and drop if a dropzone is attached or specified
 			if ( (self.options.dragDrop && self.options.dropZone !== null) || self.element.is('div'))
-				_initDragDrop();	
+				_initDragDrop();
 	
 		};
 		
 		/**
 		 * Drag and drop
+		 *
+		 * @param {boolean} isReset Whether or not the callee is reseting
 		 */
 		var _initDragDrop = function(isReset) {
-			var reset = isReset || false;			
+			var reset = isReset || false;
 						
 			// Set the dropzone
 			self.dropZone = (self.element.is('div'))
@@ -383,7 +416,7 @@
 								: self.options.dropZone;
 			
 			// Check if a dropzone was specified or if we are attached to a div
-			if (!self.dropZone) { 
+			if (!self.dropZone) {
 				_debug('No dropZone specified, can not initialize.');
 				return;
 			}
@@ -405,14 +438,15 @@
 					.css('color','grey')
 					.css('top', '50%');
 	
+				// If its a reset then don't attach events
 				if (! reset) {
 					// Add events
 					var xhr = new XMLHttpRequest();
-					if (xhr.upload) {  
-						self.dropZone.live("dragover", 	_dragOver);  
-						self.dropZone.live("dragleave",	_dragLeave);  
-						self.dropZone.live("drop", 		_drop);
-					};
+					if (xhr.upload) {
+						self.dropZone.live("dragover",	_dragOver);
+						self.dropZone.live("dragleave",	_dragLeave);
+						self.dropZone.live("drop",		_drop);
+					}
 				}
 			} else {
 				
@@ -440,7 +474,7 @@
 				self.fileInput.attr('accept', self.options.allowedTypes);
 			
 			// Check if an inputFile is set
-			if ( (self.fileInput == null) || !self.fileInput.is('input') )
+			if ( (self.fileInput === null) || !self.fileInput.is('input') )
 				_debug('No <input> element found');
 			
 			// Add custom data attribute (really don't want to do this, but only way I can get a reference after resetting the input
@@ -457,16 +491,16 @@
 			// Bind on change event to the element if it's a form input
 			self.fileInput.live('change', function(e) {
 				
-				// Check for IE 
+				// Check for IE
 				if ($.browser.msie) {
 				
 					// IE suspends timeouts until after the file dialog closes
-					setTimeout(function() {	
+					setTimeout(function() {
 						var file = {
-							name: self.fileInput.val().split('\\').pop() 
-						};				
+							name: self.fileInput.val().split('\\').pop()
+						};
 						
-						// Add files to the queue							
+						// Add files to the queue
 						self.queue.push(file);
 						
 						// Preview the image, if element is specified
@@ -490,15 +524,15 @@
 						_debug('Selecting multiple files is disabled.');
 					
 					// Add files to the queue
-					$.each(e.target.files, function(i, file) {							
+					$.each(e.target.files, function(i, file) {
 						
-						// Stop if the fileLimit has been reached			
+						// Stop if the fileLimit has been reached
 						if (!_checkFileLimit()) {
 							_debug('File limit of ' + self.options.fileLimit + ' has been reached. The queue is full!');
-							return false; 
-						}	
+							return false;
+						}
 						
-						// Push file onto the queue					
+						// Push file onto the queue
 						self.queue.push(file);
 						
 						// Preview the image, if element is specified
@@ -514,15 +548,15 @@
 					if (self.options.auto)
 						self.send();
 				}
-			});		
-		}
-		
+			});
+		};
+
 		/**
 		 * Handle iFrame load
 		 */
 		var _onIframeOnLoad = function(response, status, xhr) {
 				
-			// Get results	
+			// Get results
 			content = ($(this).contents().find('body').find('pre').length > 0)
 							? $(this).contents().find('body').find('pre').html()
 							: $(this).contents().find('body').html();
@@ -533,7 +567,7 @@
 			// Check if the response could be parsed
 			if ((data !== null)) {
 					
-				// If the request was a succes, call onSuccess	
+				// If the request was a succes, call onSuccess
 				(data.success)
 					? self.options.onSuccess(data, data.success.toString())
 					: self.options.onError(data, data.success.toString());
@@ -583,10 +617,10 @@
 						});
 					}
 		
-					// Add image to the preview element	
-					preview.append(image);	
-				}	
-			}
+					// Add image to the preview element
+					preview.append(image);
+				}
+			};
 		};
 		
 		/**
@@ -594,7 +628,7 @@
 		 *
 		 * @param object the image to resize
 		 */
-		var _resizeImage = function(image) {			
+		var _resizeImage = function(image) {
 			var max_size = self.options.resizeMax;
 			
 			// Set the height
@@ -602,17 +636,17 @@
 						? max_size
 						: Math.ceil(image.height / image.width * max_size);
 			
-			// Set the width			
+			// Set the width
 			var w = (image.height > image.width)
 						? Math.ceil(image.width / image.height * max_size)
 						: max_size;
 			
 			// Apply the resize via CSS
-			$(image).css({ height: h, width: w });	
+			$(image).css({ height: h, width: w });
 		};
 		
 		/**
-		 * Send a file via old iFrame hack since XHR Level 2 is not supported 
+		 * Send a file via old iFrame hack since XHR Level 2 is not supported
 		 */
 		var _sendFileIframe = function() {
 			var iframe;
@@ -623,22 +657,22 @@
 			// Recursively build the iFrame if one already exists
 			(function buildIframe(index) {
 				
-				// Set the id 
-				var id = (index > 0) 
-							? 'upload_frame_' + index 
-							: 'upload_frame';	
-			
+				// Set the id
+				var id = (index > 0)
+							? 'upload_frame_' + index
+							: 'upload_frame';
+
 				// Check if there is already an iFrame with ID upload_frame
 				iframe = $('#'+id);
 				
-				// Append iFrame to the body 
+				// Append iFrame to the body
 				if ( iframe.length <= 0 ) {
 					iframe = $('<iframe/>', {
-						name 	: id,
-						id 		: id ,
+						name	: id,
+						id		: id ,
 						'class'	: 'hidden', // Need to use quotes here since it's a Javascript reserved word and of course IE will choke
-						src  	: '',
-						width	: 0, 
+						src		: '',
+						width	: 0,
 						height	: 0,
 						border	: 0
 					}).appendTo($(document).find('body'));
@@ -655,38 +689,38 @@
 			})(0);
 							
 			// Wrap the input in a form if it isn't already
-			if (! self.fileInput.isChildOf('form') ) 
+			if (! self.fileInput.isChildOf('form') )
 				self.fileInput.wrap('<form>');
 			
 			// Set form attributes
 			var form = self.fileInput.closest('form');
 			form.attr('action',		self.options.action);
-			form.attr('target', 	iframe.attr('id'));
-			form.attr('method', 	'post');
-			form.attr('enctype', 	'multipart/form-data');
-			form.attr('encoding', 	'multipart/form-data');
+			form.attr('target',		iframe.attr('id'));
+			form.attr('method',		'post');
+			form.attr('enctype',	'multipart/form-data');
+			form.attr('encoding',	'multipart/form-data');
 
 			// Submit the form
-			form.submit();			
+			form.submit();
 		};
 		
 		/**
-		 * Send a file via XHR Level 2 
+		 * Send a file via XHR Level 2
 		 */
 		var _sendFileAjax = function() {
 								
 			// Build the formData
 			var formData = new FormData();
 			$.each(self.queue, function(i, file) {
-				formData.append('file-'+i, file);				
+				formData.append('file-'+i, file);
 				
 				// If PUT, send each file separately
-				if (self.options.method.toUpperCase() === 'PUT') 
+				if (self.options.method.toUpperCase() === 'PUT')
 					_sendXHR(file, i);
 			});
 			
 			// If POST, send the entire filelist at once
-			if (self.options.method.toUpperCase() === 'POST') 
+			if (self.options.method.toUpperCase() === 'POST')
 				_sendXHR(formData);
 		};
 		
@@ -699,7 +733,7 @@
 		var _sendXHR = function(data, index) {
 			
 			// If PUT ensure that an index was passed in
-			if ( (self.options.method.toUpperCase() === 'PUT') && (typeof index === 'undefined') ) 
+			if ( (self.options.method.toUpperCase() === 'PUT') && (typeof index === 'undefined') )
 				_debug('PUT request requires queue index, progressBar will not work!');
 			
 			
@@ -719,21 +753,21 @@
 			var xhr = new XMLHttpRequest();
 			
 			// Upload progress listener
-			xhr.upload.addEventListener("progress", function(e) {	
+			xhr.upload.addEventListener("progress", function(e) {
 					
-				if (!e.lengthComputable) 
-					self.options.onProgress('Unable to compute progress.');	
+				if (!e.lengthComputable)
+					self.options.onProgress('Unable to compute progress.');
 					
-				var loaded  	= e.position  || e.loaded;
-				var total   	= e.totalSize || e.total;	
-				var percent 	= Math.round( loaded * 100 / total);			
+				var loaded	= e.position  || e.loaded;
+				var total	= e.totalSize || e.total;
+				var percent	= Math.round( loaded * 100 / total);
 				
 				// Update the progress bar
 				if (progressBar)
 					progressBar.val(percent);
 					
-				// Send back the progress	
-				self.options.onComplete(e.target.response, e.target.status, e);				
+				// Send back the progress
+				self.options.onComplete(e.target.response, e.target.status, e);
 			}, false);
 			
 			// On success listener
@@ -742,7 +776,7 @@
 				// Clear the queue
 				self.queue.length = 0;
 						
-				// Call onSuccess				
+				// Call onSuccess
 				self.options.onSuccess(e.target.response, e.target.status, e);
 				
 				// Always call onComplete
@@ -750,19 +784,19 @@
 			}, false);
 			
 			// On error listener
-			xhr.addEventListener("error", function(e) {		
+			xhr.addEventListener("error", function(e) {
 				
 				// Clear the queue
 				self.queue.length = 0;
 					
-				// Call onError	
+				// Call onError
 				self.options.onError(e.target.response, e.target.status, e);
 				
 				// Always call onComplete
 				self.options.onComplete(e.target.response, e.target.status, e);
 			}, false);
 			
-			// Open the request		
+			// Open the request
 			xhr.open(self.options.method.toUpperCase(), self.options.action);
 			
 			// Set headers if the method is PUT
@@ -796,7 +830,7 @@
 			self.resetInput();
 			
 			// Output debug info
-			_debug('Reset');	
+			_debug('Reset');
 		};
 		
 		/**
@@ -814,10 +848,10 @@
 		/**
 		 * Resets the input
 		 */
-		self.resetInput = function() {								
+		self.resetInput = function() {
 								
 			// Clear the input if we are attached or if one is specified
-			if (self.fileInput != null) 
+			if (self.fileInput !== null)
 				self.fileInput.replaceWith(clonedInput);	// Have to replace the input since it's read-only
 			
 			// Reset the inputFile
@@ -838,7 +872,7 @@
 			
 			// Output debug info
 			_debug('Queue reset');
-			_debug('Queue: ')
+			_debug('Queue: ');
 			_debug(self.queue);
 		};
 		
@@ -848,7 +882,7 @@
 		self.resetPreview = function() {
 			
 			if (self.options.preview)
-				self.options.preview.html('');			
+				self.options.preview.html('');
 			
 			// Output debug info
 			_debug('Preview Cleared');
@@ -860,7 +894,7 @@
 		self.getQueue = function() {
 			
 			// Output debug info
-			_debug('Queue: ')
+			_debug('Queue: ');
 			_debug(self.queue);
 		};
 		
@@ -881,7 +915,7 @@
 			(self.supportsFileUpload)
 				? _sendFileAjax()
 				: _sendFileIframe();
-		};	
+		};
 		
 		// Initialize
 		_init();
