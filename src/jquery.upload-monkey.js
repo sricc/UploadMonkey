@@ -55,7 +55,6 @@
 				auto				: true,
 				debug				: true,
 				dragDrop			: true,
-				fileType			:'image',
 				allowedTypes		: null,
 				dropZone			: null,
 				dropZoneText		: 'Drop files here...',

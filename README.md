@@ -1,6 +1,6 @@
 # Upload Monkey
 
-A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  The plugin will fallback to the old iFrame hack if the browser doesn't support XHR (i.e. IE).  If the upload method is set to POST all files will be uploaded as one single request.  If the upload method is set to PUT each file will be uploaded separately.  
+A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  The plugin will fallback to the old iFrame hack if the browser doesn't support XHR (e.g. IE).  If the upload method is set to POST all files will be uploaded as one single request.  If the upload method is set to PUT each file will be uploaded separately.  
 
 ---
 
@@ -23,19 +23,19 @@ Given a simple html file.
 	</body>
 	</html>
 
-You can attach the upload plugin multiple ways, but in it's simpiest form just bind it to a file input or drag and drop dropzone.
+You can attach the Upload Monkey plugin multiple ways, but in it's simpiest form just bind it to a file input or drag and drop dropzone.
 	
-	var upload = $('#files').Upload(options);
+	var upload = $('input#files').UploadMonkey(options);
 	
 or
 
-	var upload = $('#dropzone').Upload(options);
+	var upload = $('div#dropzone').UploadMonkey(options);
 
 You can also specify a drag and drop dropzone while it is bound to a file input.
 
-	var upload = $('#files').Upload({
+	var upload = $('input#files').UploadMonkey({
 			dragDrop 		: true,
-			dropZone 		: $('#dropzone'),
+			dropZone 		: $('div#dropzone'),
 			dropZoneText 	: 'Drop files here...',
 			action 			: 'http://www.upload.me.com/upload.php',
 			}
@@ -43,8 +43,8 @@ You can also specify a drag and drop dropzone while it is bound to a file input.
 
 You can also do the reverse, bind it to a drag and drop dropzone and specify a file input.
 
-	var upload = $('#dropzone').Upload({
-			fileInput		: $('#files'),
+	var upload = $('div#dropzone').UploadMonkey({
+			fileInput		: $('input#files'),
 			dragDrop 		: true,
 			dropZoneText 	: 'Drop files here...',
 			action 			: 'http://www.upload.me.com/upload.php',
@@ -56,7 +56,7 @@ You can also do the reverse, bind it to a drag and drop dropzone and specify a f
 
 ## Options
 
-Upload was designed to be as flexible as possible but still completely functional.
+Upload Monkey was designed to be as flexible as possible but still completely functional.
 
 ### Debugging 
 
@@ -65,32 +65,31 @@ Upload was designed to be as flexible as possible but still completely functiona
 ### Queue
 
 * **queue**				- the element that will be used as the queue (div)
-* **showQueue**			- if showQueue is set to true, the queue will be shown, if it's false, the queue will be hidden
+* **showQueue**			- if showQueue is set to true (default), the queue will be shown, if false, the queue will be hidden
 * **queueOptions**	 	- options for the queue
-	* **name** 	 	 		- if set to true, the file name will be shown in the queue
-	* **type** 	 	 		- if set to true, the file type will be shown in the queue
-	* **size** 	 			- if set to true, the file size will be shown in the queue
-	* **lastModified**		- if set to true, the file last modified date will be shown in the queue
-	* **progressBar** 		- if set to true, the progress bar will be shown in the queue
+	* **name** 	 	 		- if set to true (default), the file name will be shown in the queue
+	* **type** 	 	 		- if set to true (default), the file type will be shown in the queue
+	* **size** 	 			- if set to true (default), the file size will be shown in the queue
+	* **lastModified**		- if set to true (default), the file last modified date will be shown in the queue
+	* **progressBar** 		- if set to true (default), the progress bar will be shown in the queue
 
 ### File 
 
 * **fileLimit**			- the number of files that can be uploaded
-* **fileType** 			- the mime-type of the files being uploaded (ex. 'image')
-* **allowedTypes** 		- defaults to null, meaning there is no type filter ('jpg, 'jpeg', 'png')
+* **allowedTypes** 		- defaults to null, meaning there is no type filter (e.g. 'image/jpg, image/jpeg, image/png')
 * **multiple** 			- whether or not multiple files can be uploaded with the file input
 * **sizeLimit**			- the size limit of the files to upload, 0 is default and means unlimited
 
 ### Sending 
 
 * **auto** 				- if auto is true (default), the file will be uploaded as soon as it's added
-* **method** 			- the method to use (i.e. 'post' or 'put')
+* **method** 			- the method to use (e.g. 'post' or 'put')
 * **action** 			- the action to take, 'upload.php' is default 
 
 ### Preview Image 
 
 * **preview**			- the preview container
-* **resizeMax**			- the max image size for the preview
+* **resizeMax**			- the max image size for the preview (e.g. '150px')
 
 ### File Input
 
@@ -100,7 +99,7 @@ Upload was designed to be as flexible as possible but still completely functiona
  		
 		Given the above input, the fileInput option would look like:
  		
- 		fileInput: $('#files') 
+ 		fileInput: $('input#files') 
  		
 	
 ### Drag and Drop
@@ -112,12 +111,12 @@ Upload was designed to be as flexible as possible but still completely functiona
  		
 		Given the above input, the dropZone option would look like:
  		
- 		dropZone: $('#dropzone') 
+ 		dropZone: $('div#dropzone') 
 
 
-* **dropZoneText** 		- 'Drop files here...'
-* **dropZoneTextSize** 	- The text size of the dropzone text
-* **dzDragOverColor** 	- The background color of the dropzone when the user hovers over it with a file to drop
+* **dropZoneText** 		- Any string you'd like the dropzone to say, defaults to 'Drop files here…'
+* **dropZoneTextSize** 	- The text size of the dropzone text, defaults to '20px'
+* **dzDragOverColor** 	- The background color of the dropzone when the user hovers over it with a file to drop, defaults to '#99CCFF'
 * **inputFile**			- The file input element for file upload
 
 ### Events
