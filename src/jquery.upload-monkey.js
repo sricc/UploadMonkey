@@ -195,7 +195,7 @@
 				if ( self.options.method.toUpperCase() === 'POST' )
 					self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
 				
-				$('#queue_list').find('progress')
+				$('ul#queue_list').find('progress')
 					.css('margin-left', '7px');
 			}
 
@@ -663,7 +663,7 @@
 							: 'upload_frame';
 
 				// Check if there is already an iFrame with ID upload_frame
-				iframe = $('#'+id);
+				iframe = $('iframe#'+id);
 				
 				// Append iFrame to the body
 				if ( iframe.length <= 0 ) {
@@ -743,7 +743,7 @@
 									: 'bar_filelist';
 			
 			// Select the element
-			var progressBar = $('#' + progressName);
+			var progressBar = $('progress#' + progressName);
 	
 			// Show the progress bar
 			if (progressBar)
@@ -855,7 +855,7 @@
 				self.fileInput.replaceWith(clonedInput);	// Have to replace the input since it's read-only
 			
 			// Reset the inputFile
-			self.fileInput = $('.upload-input');
+			self.fileInput = $('input.upload-input');
 									
 			// Output debug info
 			_debug('Input Reset');
