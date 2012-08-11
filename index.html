@@ -123,11 +123,11 @@
 
 <ul>
 <li>
-<strong>fileLimit</strong>         - the number of files that can be uploaded</li>
+<strong>fileLimit</strong>         - the number of files that can be uploaded, defaults to 0, meaning unlimited.</li>
 <li>
 <strong>allowedTypes</strong>      - defaults to null, meaning there is no type filter (e.g. 'image/jpg, image/jpeg, image/png')</li>
 <li>
-<strong>multiple</strong>          - whether or not multiple files can be uploaded with the file input</li>
+<strong>multiple</strong>          - whether or not multiple files can be uploaded with the file input, defaults to false, meaning only file can be uploaded at a time</li>
 <li>
 <strong>sizeLimit</strong>         - the size limit of the files to upload, 0 is default and means unlimited</li>
 </ul><h3>Sending</h3>
@@ -136,9 +136,9 @@
 <li>
 <strong>auto</strong>              - if auto is true (default), the file will be uploaded as soon as it's added</li>
 <li>
-<strong>method</strong>            - the method to use (e.g. 'post' or 'put')</li>
+<strong>method</strong>            - the method to use (e.g. 'post' or 'put'), defaults to 'post'</li>
 <li>
-<strong>action</strong>            - the action to take, 'upload.php' is default </li>
+<strong>action</strong>            - the action to take, defaults to 'upload.php' </li>
 </ul><h3>Preview Image</h3>
 
 <ul>
@@ -177,7 +177,6 @@ dropZone: $('div#dropzone')
 <li><p><strong>dropZoneText</strong>      - Any string you'd like the dropzone to say, defaults to 'Drop files here…'</p></li>
 <li><p><strong>dropZoneTextSize</strong>  - The text size of the dropzone text, defaults to '20px'</p></li>
 <li><p><strong>dzDragOverColor</strong>   - The background color of the dropzone when the user hovers over it with a file to drop, defaults to '#99CCFF'</p></li>
-<li><p><strong>inputFile</strong>         - The file input element for file upload</p></li>
 </ul><h3>Events</h3>
 
 <ul>
@@ -219,7 +218,7 @@ dropZone: $('div#dropzone')
 </li>
 </ul><h2>MIT License</h2>
 
-<hr><p>Copyright (c) 2012 Steve Ricciardelli <a href="mailto:stephen.j.ricciardelli@gmail.com">stephen.j.ricciardelli@gmail.com</a></p>
+<hr><p>Copyright (c) 2012 Steve Ricciardelli</p>
 
 <p>Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
