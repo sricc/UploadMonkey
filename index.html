@@ -16,14 +16,14 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          <a id="forkme_banner" href="https://github.com/stevericc/Upload-Monkey">View on GitHub</a>
+          <a id="forkme_banner" href="https://github.com/stevericc/UploadMonkey">View on GitHub</a>
 
           <h1 id="project_title">Upload Monkey</h1>
           <h2 id="project_tagline">A jquery plugin that handles file uploads</h2>
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/stevericc/Upload-Monkey/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/stevericc/Upload-Monkey/tarball/master">Download this project as a tar.gz file</a>
+              <a class="zip_download_link" href="https://github.com/stevericc/UploadMonkey/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/stevericc/UploadMonkey/tarball/master">Download this project as a tar.gz file</a>
             </section>
         </header>
     </div>
@@ -31,32 +31,214 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>Welcome to GitHub Pages.</h3>
+        <h1>Upload Monkey</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  The plugin will fallback to the old iFrame hack if the browser doesn't support XHR (e.g. IE).  If the upload method is set to POST all files will be uploaded as one single request.  If the upload method is set to PUT each file will be uploaded separately.  </p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<hr><h2>Usage</h2>
+
+<p>Given a simple html file.</p>
+
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="dropzone" class="uploadable"&gt;&lt;/div&gt;
+
+    &lt;input type="file" name='file' id="files" name="files[]" /&gt;
+
+    &lt;div id="preview"&gt;&lt;/div&gt;
+
+    &lt;div id="queue"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>You can attach the Upload Monkey plugin multiple ways, but in it's simpiest form just bind it to a file input or drag and drop dropzone.</p>
 
-<h3>Designer Templates</h3>
+<pre><code>var upload = $('input#files').UploadMonkey(options);
+</code></pre>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>or</p>
 
-<h3>Rather Drive Stick?</h3>
+<pre><code>var upload = $('div#dropzone').UploadMonkey(options);
+</code></pre>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>You can also specify a drag and drop dropzone while it is bound to a file input.</p>
 
-<h3>Authors and Contributors</h3>
+<pre><code>var upload = $('input#files').UploadMonkey({
+        dragDrop        : true,
+        dropZone        : $('div#dropzone'),
+        dropZoneText    : 'Drop files here...',
+        action          : 'http://www.upload.me.com/upload.php',
+        }
+    });
+</code></pre>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>You can also do the reverse, bind it to a drag and drop dropzone and specify a file input.</p>
 
-<h3>Support or Contact</h3>
+<pre><code>var upload = $('div#dropzone').UploadMonkey({
+        fileInput       : $('input#files'),
+        dragDrop        : true,
+        dropZoneText    : 'Drop files here...',
+        action          : 'http://www.upload.me.com/upload.php',
+        }
+    });
+</code></pre>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<hr><h2>Options</h2>
+
+<p>Upload Monkey was designed to be as flexible as possible but still completely functional.</p>
+
+<h3>Debugging</h3>
+
+<ul>
+<li>
+<strong>debug</strong>             - if debug is true (default), then debug info will be logged to the console</li>
+</ul><h3>Queue</h3>
+
+<ul>
+<li>
+<strong>queue</strong>             - the element that will be used as the queue (div)</li>
+<li>
+<strong>showQueue</strong>         - if showQueue is set to true (default), the queue will be shown, if false, the queue will be hidden</li>
+<li>
+<strong>queueOptions</strong>      - options for the queue
+
+<ul>
+<li>
+<strong>name</strong>              - if set to true (default), the file name will be shown in the queue</li>
+<li>
+<strong>type</strong>              - if set to true (default), the file type will be shown in the queue</li>
+<li>
+<strong>size</strong>              - if set to true (default), the file size will be shown in the queue</li>
+<li>
+<strong>lastModified</strong>      - if set to true (default), the file last modified date will be shown in the queue</li>
+<li>
+<strong>progressBar</strong>       - if set to true (default), the progress bar will be shown in the queue</li>
+</ul>
+</li>
+</ul><h3>File</h3>
+
+<ul>
+<li>
+<strong>fileLimit</strong>         - the number of files that can be uploaded</li>
+<li>
+<strong>allowedTypes</strong>      - defaults to null, meaning there is no type filter (e.g. 'image/jpg, image/jpeg, image/png')</li>
+<li>
+<strong>multiple</strong>          - whether or not multiple files can be uploaded with the file input</li>
+<li>
+<strong>sizeLimit</strong>         - the size limit of the files to upload, 0 is default and means unlimited</li>
+</ul><h3>Sending</h3>
+
+<ul>
+<li>
+<strong>auto</strong>              - if auto is true (default), the file will be uploaded as soon as it's added</li>
+<li>
+<strong>method</strong>            - the method to use (e.g. 'post' or 'put')</li>
+<li>
+<strong>action</strong>            - the action to take, 'upload.php' is default </li>
+</ul><h3>Preview Image</h3>
+
+<ul>
+<li>
+<strong>preview</strong>           - the preview container</li>
+<li>
+<strong>resizeMax</strong>         - the max image size for the preview (e.g. '150px')</li>
+</ul><h3>File Input</h3>
+
+<ul>
+<li>
+<p><strong>fileInput</strong>         - the file input selector </p>
+
+<pre><code>&lt;input type="file" name='file' id="files" name="files[]" /&gt;
+
+Given the above input, the fileInput option would look like:
+
+fileInput: $('input#files') 
+</code></pre>
+</li>
+</ul><h3>Drag and Drop</h3>
+
+<ul>
+<li>
+<strong>dragDrop</strong>          - if true (default), then drag and drop is enabled</li>
+<li>
+<p><strong>dropZone</strong>          - this element that will act as the dropzone, must be a div!</p>
+
+<pre><code>&lt;div id="dropzone" class="uploadable"&gt;&lt;/div&gt;
+
+Given the above input, the dropZone option would look like:
+
+dropZone: $('div#dropzone') 
+</code></pre>
+</li>
+<li><p><strong>dropZoneText</strong>      - Any string you'd like the dropzone to say, defaults to 'Drop files here…'</p></li>
+<li><p><strong>dropZoneTextSize</strong>  - The text size of the dropzone text, defaults to '20px'</p></li>
+<li><p><strong>dzDragOverColor</strong>   - The background color of the dropzone when the user hovers over it with a file to drop, defaults to '#99CCFF'</p></li>
+<li><p><strong>inputFile</strong>         - The file input element for file upload</p></li>
+</ul><h3>Events</h3>
+
+<ul>
+<li>
+<p><strong>onComplete</strong>        - callback for when the request is complete (will always be called, regardless of sucess or error)</p>
+
+<ul>
+<li>jqXHR - the xhr request</li>
+<li>
+<p>textStatus    </p>
+
+<p>function(jqXHR, textStatus) {}</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>onSuccess</strong>         - callback for when the request is completed successfully</p>
+
+<pre><code>function(data, textStatus, jqXHR) {}
+</code></pre>
+</li>
+<li>
+<p><strong>onError</strong>           - callback for when the request is completed but there is an error</p>
+
+<pre><code>function(jqXHR, textStatus, errorThrown) {}
+</code></pre>
+</li>
+<li>
+<p><strong>onProgress</strong>        - callback for when the request sends a progress report</p>
+
+<pre><code>function(progressBarId, percent, xhr) {}
+</code></pre>
+</li>
+<li>
+<p><strong>beforeSend</strong>        - callback for before the request is sent</p>
+
+<pre><code>function(xhr) {}
+</code></pre>
+</li>
+</ul><h2>MIT License</h2>
+
+<hr><p>Copyright (c) 2012 Steve Ricciardelli <a href="mailto:stephen.j.ricciardelli@gmail.com">stephen.j.ricciardelli@gmail.com</a></p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
       </section>
     </div>
 
