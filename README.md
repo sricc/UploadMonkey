@@ -75,16 +75,16 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 
 ### File 
 
-* **fileLimit**			- the number of files that can be uploaded
+* **fileLimit**			- the number of files that can be uploaded, defaults to 0, meaning unlimited.
 * **allowedTypes** 		- defaults to null, meaning there is no type filter (e.g. 'image/jpg, image/jpeg, image/png')
-* **multiple** 			- whether or not multiple files can be uploaded with the file input
+* **multiple** 			- whether or not multiple files can be uploaded with the file input, defaults to false, meaning only file can be uploaded at a time
 * **sizeLimit**			- the size limit of the files to upload, 0 is default and means unlimited
 
 ### Sending 
 
 * **auto** 				- if auto is true (default), the file will be uploaded as soon as it's added
-* **method** 			- the method to use (e.g. 'post' or 'put')
-* **action** 			- the action to take, 'upload.php' is default 
+* **method** 			- the method to use (e.g. 'post' or 'put'), defaults to 'post'
+* **action** 			- the action to take, defaults to 'upload.php' 
 
 ### Preview Image 
 
@@ -117,7 +117,6 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 * **dropZoneText** 		- Any string you'd like the dropzone to say, defaults to 'Drop files here…'
 * **dropZoneTextSize** 	- The text size of the dropzone text, defaults to '20px'
 * **dzDragOverColor** 	- The background color of the dropzone when the user hovers over it with a file to drop, defaults to '#99CCFF'
-* **inputFile**			- The file input element for file upload
 
 ### Events
 
@@ -145,7 +144,7 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 		
 ## MIT License
 ------------
-Copyright (c) 2012 Steve Ricciardelli <stephen.j.ricciardelli@gmail.com>
+Copyright (c) 2012 Steve Ricciardelli
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
