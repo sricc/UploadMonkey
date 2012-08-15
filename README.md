@@ -147,6 +147,18 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 * **beforeSend**		- callback for before the request is sent
 
 		function(xhr) {}
+
+## Methods
+------------
+		
+* resetDropzone() - Resets the dropzone 
+* resetInput() - Resets the file input
+* resetQueue()- Resets the queue (i.e. clears the queue)
+* resetPreview() - Resets/Clears the preview container
+* reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())
+* getQueue() - Gets the current contents of the queue
+* send() - Manually sends the files in the queue
+		
 		
 ## MIT License
 ------------
