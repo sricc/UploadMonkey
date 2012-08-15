@@ -1,7 +1,7 @@
 (function($, window, document, undefined) {
 	
 	/**
-	 * Constructor (expose Upload)
+	 * Constructor (expose UploadMonkey)
 	 *
 	 * @param {object} options	The options object
 	 * @return {object}			An UploadMonkey object
@@ -24,7 +24,7 @@
 	
 	
 	/**
-	 * Upload object
+	 * UploadMonkey object
 	 *
 	 * @param {element} element The DOM element that this plugin is bound to
 	 * @param {object} opts		The options object
@@ -75,7 +75,7 @@
 		/**
 		 * Version string
 		 */
-		self.version = "0.0.1";
+		self.version = "0.1.0";
 		/**
 		 * Private data store, containing all of the settings objects
 		 */
@@ -85,7 +85,7 @@
 		 */
 		self.queue	= [],
 		/**
-		 * The element that Upload is bound to
+		 * The element that UploadMonkey is bound to
 		 */
 		self.element = null;
 		/**
@@ -919,5 +919,5 @@
 		// Initialize
 		_init();
 		
-	}; // End Upload Class
+	}; // End UploadMonkey Class
 })(jQuery, window, document);
