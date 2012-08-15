@@ -4,6 +4,8 @@ A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  
 
 ---
 
+## Documentation
+
 Check out the [documentation](http://stevericc.github.com/UploadMonkey/) for more information.
 
 ---
