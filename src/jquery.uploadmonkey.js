@@ -22,6 +22,16 @@
 		}
 	});
 	
+	$.extend($, {
+		isJSON: function (data) {
+		    try {
+		        JSON.parse(data);
+		    } catch (e) {
+		        return false;
+			}
+		    return true;
+		}
+	});
 	
 	/**
 	 * UploadMonkey object
@@ -40,6 +50,7 @@
 		 * The default options
 		 */
 		var _defaultOptions = {
+				forceIframe			: false,
 				fileLimit			: 0,
 				multiple			: false,
 				queue				: null,
@@ -553,28 +564,56 @@
 		/**
 		 * Handle iFrame load
 		 */
-		var _onIframeOnLoad = function(response, status, xhr) {
-				
+		var _onIframeOnLoad = function() {
+			var data,
+				success,
+				error,
+				status;
+
 			// Get results
 			content = ($(this).contents().find('body').find('pre').length > 0)
 							? $(this).contents().find('body').find('pre').html()
 							: $(this).contents().find('body').html();
-			
-			// Parse the JSON repsonse
-			var data = $.parseJSON(content);
-			
+
+			// Handle the response
+			if ($.isJSON(content)) {
+				data	= $.parseJSON(content);
+				success	= data.success.toString();
+				error	= (data.error)  ? data.error  : 'Unknown Error';
+				status	= (data.status) ? data.status : 'Unknown Status';
+			} else {
+				try {
+					var title	= $(this).contents().find('title').html();
+					var regex	= /^\w*\s(.*)$/;
+					status		= success = parseInt(title.split(/\b/)[0]);
+					error		= regex.exec(title)[1];
+
+					data = {
+						response	: title,
+						status		: status,
+						error		: error
+					};
+				} catch(e) {
+					data = {
+						response	: 'Could not parse response',
+						status		: 'Unknown Status',
+						error		: 'Unknown Error'
+					};
+				}
+			}
+
 			// Check if the response could be parsed
-			if ((data !== null)) {
+			if (data !== null) {
 					
 				// If the request was a succes, call onSuccess
 				(data.success)
-					? self.options.onSuccess(data, data.success.toString())
-					: self.options.onError(data, data.success.toString());
+					? self.options.onSuccess(data, status, {})
+					: self.options.onError(data, status, error, {});
 					
 				// Always call onComplete
-				self.options.onComplete(data, data.success.toString());
+				self.options.onComplete(data, success);
 			} else
-				_debug('Response was not valid JSON');
+				_debug('Could not parse the response.');
 			
 			// Remove the iFrame
 			$(this).remove();
@@ -651,7 +690,7 @@
 			var iframe;
 			
 			// Output debug info
-			_debug('Can not use normal input, falling back to iFrame hack!');
+			_debug('Falling back to iFrame hack!');
 			
 			// Recursively build the iFrame if one already exists
 			(function buildIframe(index) {
@@ -913,7 +952,7 @@
 			}
 			
 			// Send the request
-			(self.supportsFileUpload)
+			(self.supportsFileUpload && !self.options.forceIframe)
 				? _sendFileAjax()
 				: _sendFileIframe();
 		};

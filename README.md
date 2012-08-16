@@ -91,6 +91,7 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 * **auto** 				- if auto is true (default), the file will be uploaded as soon as it's added
 * **method** 			- the method to use (e.g. 'post' or 'put'), defaults to 'post'
 * **action** 			- the action to take, defaults to 'upload.php' 
+* **forceIframe**		- setting this to true will force the use of the iFrame hack (not sure why, but it's here if you need it), defaults to false
 
 ### Preview Image 
 

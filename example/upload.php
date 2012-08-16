@@ -87,7 +87,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 		}
 	
 		(empty($error)) 
-			? sendAjaxResponse(201, array('success'=>true, 'url'=>$path))
-			: sendAjaxResponse(500, array('success'=>false, 'error'=>$error));	
+			? sendAjaxResponse(201, array('success'=>true, 'url'=>$path, 'status'=>201))
+			: sendAjaxResponse(500, array('success'=>false, 'error'=>$error, 'status'=>500));	
 
 }
