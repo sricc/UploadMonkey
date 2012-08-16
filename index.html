@@ -248,24 +248,26 @@ dropZone: $('div#dropzone')
 <p><strong>beforeSend</strong> - callback for before the request is sent</p>
 
 <ul>
+<li>data- the data being sent (i.e. file or fileList)</li>
 <li>
 <p>xhr - the xhr object</p>
 
-<pre><code>function(xhr) {}
+<pre><code>function(data, xhr) {}
 </code></pre>
+
+<h2>Methods</h2>
+
+<hr>
 </li>
 </ul>
 </li>
-</ul><h2>Methods</h2>
-
-<hr><ul>
-<li>resetDropzone() - Resets the dropzone </li>
-<li>resetInput() - Resets the file input</li>
-<li>resetQueue()- Resets the queue (i.e. clears the queue)</li>
-<li>resetPreview() - Resets/Clears the preview container</li>
-<li>reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())</li>
-<li>getQueue() - Gets the current contents of the queue</li>
-<li>send() - Manually sends the files in the queue</li>
+<li><p>resetDropzone() - Resets the dropzone </p></li>
+<li><p>resetInput() - Resets the file input</p></li>
+<li><p>resetQueue()- Resets the queue (i.e. clears the queue)</p></li>
+<li><p>resetPreview() - Resets/Clears the preview container</p></li>
+<li><p>reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())</p></li>
+<li><p>getQueue() - Gets the current contents of the queue</p></li>
+<li><p>send() - Manually sends the files in the queue</p></li>
 </ul><h2>MIT License</h2>
 
 <hr><p>Copyright (c) 2012 Steve Ricciardelli</p>
