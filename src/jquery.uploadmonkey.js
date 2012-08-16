@@ -67,7 +67,7 @@
 				action				: 'upload.php',
 				onComplete			: function(response, status, event) {},
 				onSuccess			: function(response, status, event) {},
-				onError				: function(response, status, event) {},
+				onError				: function(response, status, error, event) {},
 				onProgress			: function(progressBar, percent, event) {},
 				beforeSend			: function(data, xhr) {}
 		};
@@ -775,8 +775,10 @@
 				// Clear the queue
 				self.queue.length = 0;
 						
-				// Call onSuccess
-				self.options.onSuccess(e.target.response, e.target.status, e);
+				// Call onSuccess/onError (Have to do this check, for some reason 'error' event doesn't get raised in every browser)
+				( (xhr.status >= 200) && (xhr.status < 300) )
+					? self.options.onSuccess(e.target.response, e.target.status, e)
+					: self.options.onError(e.target.response, e.target.status, e.target.statusText, e);
 				
 				// Always call onComplete
 				self.options.onComplete(e.target.response, e.target.status, e);
@@ -784,12 +786,12 @@
 			
 			// On error listener
 			xhr.addEventListener("error", function(e) {
-				
+
 				// Clear the queue
 				self.queue.length = 0;
 					
 				// Call onError
-				self.options.onError(e.target.response, e.target.status, e);
+				self.options.onError(e.target.response, e.target.status, e.target.statusText, e);
 				
 				// Always call onComplete
 				self.options.onComplete(e.target.response, e.target.status, e);

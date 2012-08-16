@@ -80,11 +80,12 @@
 				console.log(status);
 				console.log(event);
 			},
-			onError 		: function(response, status, event) {
+			onError 		: function(response, status, error, event) {
 				console.log('onError');	
 				
 				console.log(response);
 				console.log(status);
+				console.log(error);
 				console.log(event);
 			},
 			onProgress		: function(current, percent, event) {
@@ -92,7 +93,6 @@
 				console.log(current);
 				console.log(percent);
 				console.log(event);
-				$('#bar').val(percent);
 			}
 		});
 	
@@ -148,43 +148,43 @@
 		});
 		*/
 
-		$('#upload').live('click', function(e) {
+		$('#upload').on('click', function(e) {
 			e.preventDefault();
 
 			upload.send();
 		});
 
-		$('#resetQueue').live('click', function(e) {			
+		$('#resetQueue').on('click', function(e) {			
 			e.preventDefault();
 
 			upload.resetQueue();
 		});
 		
-		$('#reset').live('click', function(e) {			
+		$('#reset').on('click', function(e) {			
 			e.preventDefault();
 
 			upload.reset();
 		});
 		
-		$('#resetDropzone').live('click', function(e) {			
+		$('#resetDropzone').on('click', function(e) {			
 			e.preventDefault();
 
 			upload.resetDropzone();
 		});
 		
-		$('#resetInput').live('click', function(e) {			
+		$('#resetInput').on('click', function(e) {			
 			e.preventDefault();
 
 			upload.resetInput();
 		});
 		
-		$('#resetPreview').live('click', function(e) {			
+		$('#resetPreview').on('click', function(e) {			
 			e.preventDefault();
 
 			upload.resetPreview();
 		});
 	
-		$('#getQueue').live('click', function(e) {			
+		$('#getQueue').on('click', function(e) {			
 			e.preventDefault();
 			
 			upload.getQueue()
