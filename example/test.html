@@ -72,20 +72,26 @@
 				progressBar	 : true	
 			},
 			resizeMax		: '150px',
-			action 			: 'http://www.upload.me.com/test/upload.php',
-			onSuccess 		: function(data, textStatus, jqXHR) {
+			action 			: 'http://www.upload.me.com/example/upload.php',
+			onSuccess 		: function(response, status, event) {
 				console.log('onSuccess');
 				
-				console.log(data);
+				console.log(response);
+				console.log(status);
+				console.log(event);
 			},
-			onError 		: function(data, textStatus) {
+			onError 		: function(response, status, event) {
 				console.log('onError');	
 				
-				console.log(data);
+				console.log(response);
+				console.log(status);
+				console.log(event);
 			},
-			onProgress		: function(current, percent, xhr) {
+			onProgress		: function(current, percent, event) {
 				
 				console.log(current);
+				console.log(percent);
+				console.log(event);
 				$('#bar').val(percent);
 			}
 		});
@@ -102,7 +108,7 @@
 			queue 			: $('#list'),
 			preview 		: $('#preview'),
 			showQueue  		: true,
-			action 			: 'http://www.upload.me.com/test/upload.php',
+			action 			: 'http://www.upload.me.com/example/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('onSuccess');
 				
@@ -127,7 +133,7 @@
 			queue 			: $('#list'),
 			preview 		: $('#preview'),
 			showQueue  		: true,
-			action 			: 'http://www.upload.me.com/test/upload.php',
+			action 			: 'http://www.upload.me.com/example/upload.php',
 			onSuccess 		: function(data, textStatus, jqXHR) {
 				console.log('onSuccess');
 				

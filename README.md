@@ -126,27 +126,40 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 
 ### Events
 
-* **onComplete**		- callback for when the request is complete (will always be called, regardless of sucess or error)
-	* jqXHR - the xhr request
-	* textStatus  	
+* **onComplete** - callback for when the request is complete (will always be called, regardless of sucess or error)
+	* response - the data response
+	* status - the status code 	
+	* event - the event object
         
-        function(jqXHR, textStatus) {}
 
-* **onSuccess** 		- callback for when the request is completed successfully
+			function(response, status, event) {}
 
-		function(data, textStatus, jqXHR) {}
+* **onSuccess**  - callback for when the request is completed successfully
+	* response - the data response
+	* status - the status code 	
+	* event - the event object
 
-* **onError** 			- callback for when the request is completed but there is an error
+			function(response, status, event) {}
 
-		function(jqXHR, textStatus, errorThrown) {}
+* **onError**  - callback for when the request is completed but there is an error
+	* response - the data response
+	* status - the status code 	
+	* event - the event object
 
-* **onProgress** 		- callback for when the request sends a progress report
+			function(response, status, event) {}
 
-		function(progressBarId, percent, xhr) {}
+* **onProgress**  - callback for when the request sends a progress report
+	* progressBar - the progress bar element
+	* percent - the percentage completed so far	
+	* event - the progress event object
 
-* **beforeSend**		- callback for before the request is sent
+			function(progressBar, percent, event) {}
 
-		function(xhr) {}
+* **beforeSend** - callback for before the request is sent
+	* data- the data being sent (i.e. file or fileList)
+	* xhr - the xhr object
+
+			function(data, xhr) {}
 
 ## Methods
 ------------

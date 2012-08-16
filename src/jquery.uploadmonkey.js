@@ -65,10 +65,10 @@
 				sizeLimit			: 0,
 				method				: 'post',
 				action				: 'upload.php',
-				onComplete			: function(jqXHR, textStatus) {},
-				onSuccess			: function(data, textStatus, jqXHR) {},
-				onError				: function(jqXHR, textStatus, errorThrown) {},
-				onProgress			: function(progressBarId, percent, xhr) {},
+				onComplete			: function(response, status, event) {},
+				onSuccess			: function(response, status, event) {},
+				onError				: function(response, status, event) {},
+				onProgress			: function(progressBar, percent, event) {},
 				beforeSend			: function(data, xhr) {}
 		};
 
@@ -755,7 +755,7 @@
 			xhr.upload.addEventListener("progress", function(e) {
 					
 				if (!e.lengthComputable)
-					self.options.onProgress('Unable to compute progress.');
+					self.options.onProgress(null, null, 'Unable to compute progress.');
 					
 				var loaded	= e.position  || e.loaded;
 				var total	= e.totalSize || e.total;
@@ -766,7 +766,7 @@
 					progressBar.val(percent);
 					
 				// Send back the progress
-				self.options.onComplete(e.target.response, e.target.status, e);
+				self.options.onProgress(progressBar, percent, e);
 			}, false);
 			
 			// On success listener
