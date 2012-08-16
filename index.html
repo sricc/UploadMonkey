@@ -186,40 +186,75 @@ dropZone: $('div#dropzone')
 
 <ul>
 <li>
-<p><strong>onComplete</strong>        - callback for when the request is complete (will always be called, regardless of sucess or error)</p>
+<p><strong>onComplete</strong> - callback for when the request is complete (will always be called, regardless of sucess or error)</p>
 
 <ul>
-<li>jqXHR - the xhr request</li>
+<li>response - the data response</li>
+<li>status - the status code<br>
+</li>
 <li>
-<p>textStatus    </p>
+<p>event - the event object</p>
 
-<p>function(jqXHR, textStatus) {}</p>
+<pre><code>function(response, status, event) {}
+</code></pre>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>onSuccess</strong>         - callback for when the request is completed successfully</p>
+<p><strong>onSuccess</strong>  - callback for when the request is completed successfully</p>
 
-<pre><code>function(data, textStatus, jqXHR) {}
-</code></pre>
+<ul>
+<li>response - the data response</li>
+<li>status - the status code<br>
 </li>
 <li>
-<p><strong>onError</strong>           - callback for when the request is completed but there is an error</p>
+<p>event - the event object</p>
 
-<pre><code>function(jqXHR, textStatus, errorThrown) {}
+<pre><code>function(response, status, event) {}
 </code></pre>
 </li>
-<li>
-<p><strong>onProgress</strong>        - callback for when the request sends a progress report</p>
-
-<pre><code>function(progressBarId, percent, xhr) {}
-</code></pre>
+</ul>
 </li>
 <li>
-<p><strong>beforeSend</strong>        - callback for before the request is sent</p>
+<p><strong>onError</strong>  - callback for when the request is completed but there is an error</p>
+
+<ul>
+<li>response - the data response</li>
+<li>status - the status code<br>
+</li>
+<li>
+<p>event - the event object</p>
+
+<pre><code>function(response, status, event) {}
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>onProgress</strong>  - callback for when the request sends a progress report</p>
+
+<ul>
+<li>progressBar - the progress bar element</li>
+<li>percent - the percentage completed so far </li>
+<li>
+<p>event - the progress event object</p>
+
+<pre><code>function(progressBar, percent, event) {}
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>beforeSend</strong> - callback for before the request is sent</p>
+
+<ul>
+<li>
+<p>xhr - the xhr object</p>
 
 <pre><code>function(xhr) {}
 </code></pre>
+</li>
+</ul>
 </li>
 </ul><h2>Methods</h2>
 
