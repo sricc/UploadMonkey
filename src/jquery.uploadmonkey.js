@@ -473,7 +473,7 @@
 			} else {
 				
 				// Drag and Drop is not possible... let them know!
-				self.dropZone.find('span')
+				self.dropZone.find('span.dropzone-text')
 					.html('Drag and Drop not supported! <br>Update your browser!!!')
 					.addClass('dropzone-text')
 					.css('color','white')
