@@ -196,23 +196,28 @@
 			}
 			
 			// Set the html in the queue
-			self.options.queue.html('<ul id="queue_list">' + output.join('') + '</ul>');
+			if (self.options.queue)
+				self.options.queue.html('<ul id="queue_list">' + output.join('') + '</ul>');
 			
 			// Set progress bar
 			if ( options.progressBar ) {
 				
 				// Set progress bar for POST
-				if ( self.options.method.toUpperCase() === 'POST' )
-					self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
+				if ( self.options.method.toUpperCase() === 'POST' ) {
+					if (self.options.queue)
+						self.options.queue.append($('<progress id="bar_filelist" class="progress-bar" max="100" value="0"></progress>'));
+				}
 				
 				$('ul#queue_list').find('progress')
 					.css('margin-left', '7px');
 			}
 
 			// Check if the queue should be shown
-			self.options.showQueue
-				? self.options.queue.show()
-				: self.options.queue.hide();
+			if (self.options.queue) {
+				self.options.showQueue
+					? self.options.queue.show()
+					: self.options.queue.hide();
+			}
 		};
 		
 		/**

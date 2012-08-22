@@ -57,9 +57,9 @@
 			debug 			: true,
 			auto 			: false,
 			multiple 		: true,
-			method 			: 'put',
+			method 			: 'post',
 			dragDrop 		: true,
-			allowedTypes 	: 'image/jpg, image/jpeg, image/png',
+			allowedTypes 	: 'image/jpg, image/jpeg, image/png, application/x-shockwave-flash',
 			dropZone 		: $('#dropzone'),
 			dropZoneText 	: 'Drop files here...',
 			preview 		: $('#preview'),
@@ -73,7 +73,7 @@
 				progressBar	 : true	
 			},
 			resizeMax		: '150px',
-			action 			: 'http://www.upload.me.com/example/upload.php',
+			action 			: 'http://www.ax.me.com/api/image/preview', //'http://www.upload.me.com/example/upload.php',
 			onSuccess 		: function(response, status, event) {
 				console.log('onSuccess');
 				
