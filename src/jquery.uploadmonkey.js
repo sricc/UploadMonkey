@@ -440,8 +440,10 @@
 			}
 
 			// Build dropzone
-			if (!reset)
+			if (!reset) {
+				self.dropZone.find('span.dropzone-text').remove();
 				self.dropZone.append('<span></span>');
+			}
 
 			if (self.options.defaultTheme) {
 				self.dropZone
