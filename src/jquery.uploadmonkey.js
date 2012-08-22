@@ -454,7 +454,7 @@
 			
 			// Check if Drap and Drop is even possible
 			if ( _checkFileApi() ) {
-				self.dropZone.find('span')
+				self.dropZone.find('span.dropzone-text')
 					.html(self.options.dropZoneText)
 					.addClass('dropzone-text')
 					.css('color','grey')
