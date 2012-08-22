@@ -440,7 +440,8 @@
 			}
 
 			// Build dropzone
-			self.dropZone.append('<span></span>');
+			if (!reset)
+				self.dropZone.append('<span></span>');
 
 			if (self.options.defaultTheme) {
 				self.dropZone
@@ -831,6 +832,10 @@
 				
 				// Clear the queue
 				self.queue.length = 0;
+
+				// Reinitaliaze the dropzone
+				if (self.dropZone)
+					_initDragDrop(true);
 						
 				// Call onSuccess/onError (Have to do this check, for some reason 'error' event doesn't get raised in every browser)
 				( (xhr.status >= 200) && (xhr.status < 300) )
@@ -969,6 +974,11 @@
 				_debug('No files to upload');
 				return;
 			}
+
+			if (self.dropZone)
+				self.dropZone.find('span.dropzone-text').html('Loading...');
+
+			_debug(self.dropZone.find('span.dropzone-text').html());
 			
 			// Send the request
 			(self.supportsFileUpload && !self.options.forceIframe)
