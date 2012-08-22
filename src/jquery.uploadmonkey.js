@@ -80,7 +80,8 @@
 				onSuccess			: function(response, status, event) {},
 				onError				: function(response, status, error, event) {},
 				onProgress			: function(progressBar, percent, event) {},
-				beforeSend			: function(data, xhr) {}
+				beforeSend			: function(data, xhr) {},
+				onPreview			: function(file) {}
 		};
 
 		/**
@@ -641,29 +642,38 @@
 				dataUlr = reader.readAsDataURL(file);
 				
 			reader.onloadend = function(e) {
-				var result = e.target.result;
-				
+				var result		= e.target.result;
+				var fileType	= e.target.result;
+				var tag;
+
 				if (result !== null) {
 				
 					var preview = self.options.preview;
-					preview.attr('class', 'file-preview');
 					
-					// Create the image
-					var image 	= $('<img\>');
-					image.attr('src', result);
-					image.attr('alt', ' ');
-					
+					// Create the image/swf
+					if (file.type == 'application/x-shockwave-flash') {
+						tag = $('<embed\>');
+						tag.attr('wmode', 'transparent');
+					} else {
+						tag	= $('<img\>');
+						tag.attr('alt', ' ');
+					}
+
+					// Set the source
+					tag.attr('src', result);
+
 					// Resize the image if specified in the options
 					if (self.options.resizeMax !== null) {
-						image.load(function() {
+						tag.load(function() {
 							_resizeImage(this);
 						});
 					}
 		
 					// Add image to the preview element
-					preview.append(image);
+					preview.append(tag);
 				}
 			};
+			self.options.onPreview(file);
 		};
 		
 		/**
