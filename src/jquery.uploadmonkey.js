@@ -71,8 +71,10 @@
 				dropZoneText		: 'Drop files here...',
 				fileInput			: null,
 				preview				: null,
+				defaultTheme		: true,
 				dropZoneTextSize	: '20px',
 				dzDragOverColor		: '#99CCFF',
+				dzDragLeaveColor	: '#FFF',
 				sizeLimit			: 0,
 				method				: 'post',
 				action				: 'upload.php',
@@ -321,7 +323,7 @@
 			_ignoreDrag(e);
 			
 			// Change background color back to white
-			$(this).css('background-color', '#FFF');
+			$(this).css('background-color', self.options.dzDragLeaveColor);
 		};
 		
 		/**
@@ -346,7 +348,7 @@
 			var dropZone = self.options.dropZone;
 			
 			// Change background color back to white
-			$(this).css('background-color', '#FFF');
+			self.dropZone.css('background-color', self.options.dzDragLeaveColor);
 			
 			// Get the dropped file
 			var dt		= e.originalEvent.dataTransfer;
@@ -437,14 +439,15 @@
 				return;
 			}
 
-			// Clear html
-			self.dropZone.html('');
-
 			// Build dropzone
-			self.dropZone.append('<span></span>')
-				.css('text-align', 'center')
-				.css('display', 'table-cell')
-				.css('vertical-align', 'middle');
+			self.dropZone.append('<span></span>');
+
+			if (self.options.defaultTheme) {
+				self.dropZone
+					.css('text-align', 'center')
+					.css('display', 'table-cell')
+					.css('vertical-align', 'middle');
+			}
 			
 			// Check if Drap and Drop is even possible
 			if ( _checkFileApi() ) {
