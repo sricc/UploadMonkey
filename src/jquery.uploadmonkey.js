@@ -913,7 +913,8 @@
 			
 			// Clear the queue
 			self.queue.length = 0;
-			self.options.queue.html('');
+			if (self.options.queue)
+				self.options.queue.html('');
 			
 			// Output debug info
 			_debug('Queue reset');
