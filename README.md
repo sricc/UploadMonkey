@@ -6,7 +6,7 @@ A simple file upload plugin that permforms POST and PUT XHR Level 2 uploading.  
 
 ## Documentation
 
-Check out the [documentation](http://stevericc.github.com/UploadMonkey/) for more information.
+Check out the [documentation](http://sricc.github.com/UploadMonkey/) for more information.
 
 ---
 
@@ -161,6 +161,11 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 	* xhr - the xhr object
 
 			function(data, xhr) {}
+			
+* **onPreview** - callback for when the preview is generated
+	* file - the file object that is being previewed
+	
+			function(file) {}
 
 ## Methods
 ------------
