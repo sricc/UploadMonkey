@@ -442,7 +442,7 @@
 			// Build dropzone
 			if (!reset) {
 				self.dropZone.find('span.dropzone-text').remove();
-				self.dropZone.append('<span class="dropzone-text"></span>');
+				self.dropZone.append('<span></span>');
 			}
 
 			// Initialize the default theme
