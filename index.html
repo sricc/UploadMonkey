@@ -16,14 +16,14 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          <a id="forkme_banner" href="https://github.com/stevericc/UploadMonkey">View on GitHub</a>
+          <a id="forkme_banner" href="https://github.com/sricc/UploadMonkey">View on GitHub</a>
 
           <h1 id="project_title">Upload Monkey</h1>
           <h2 id="project_tagline">A jQuery plugin that handles file uploads</h2>
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/stevericc/UploadMonkey/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/stevericc/UploadMonkey/tarball/master">Download this project as a tar.gz file</a>
+              <a class="zip_download_link" href="https://github.com/sricc/UploadMonkey/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/sricc/UploadMonkey/tarball/master">Download this project as a tar.gz file</a>
             </section>
         </header>
     </div>
@@ -38,8 +38,8 @@
 <hr><h2>Download</h2>
 
 <ul>
-<li><a href="https://raw.github.com/stevericc/UploadMonkey/master/src/jquery.uploadmonkey.js">Full Source</a></li>
-<li><a href="https://raw.github.com/stevericc/UploadMonkey/master/src/jquery.uploadmonkey.min.js">Minified</a></li>
+<li><a href="https://raw.github.com/sricc/UploadMonkey/master/src/jquery.uploadmonkey.js">Full Source</a></li>
+<li><a href="https://raw.github.com/sricc/UploadMonkey/master/src/jquery.uploadmonkey.min.js">Minified</a></li>
 </ul><hr><h2>Usage</h2>
 
 <p>Given a simple html file.</p>
@@ -256,20 +256,33 @@ dropZone: $('div#dropzone')
 
 <pre><code>function(data, xhr) {}
 </code></pre>
-
-<h2>Methods</h2>
-
-<hr>
 </li>
 </ul>
 </li>
-<li><p>resetDropzone() - Resets the dropzone </p></li>
-<li><p>resetInput() - Resets the file input</p></li>
-<li><p>resetQueue()- Resets the queue (i.e. clears the queue)</p></li>
-<li><p>resetPreview() - Resets/Clears the preview container</p></li>
-<li><p>reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())</p></li>
-<li><p>getQueue() - Gets the current contents of the queue</p></li>
-<li><p>send() - Manually sends the files in the queue</p></li>
+<li>
+<p><strong>onPreview</strong> - callback for when the preview is generated</p>
+
+<ul>
+<li>
+<p>file - the file object that is being previewed</p>
+
+<pre><code>function(file) {}
+</code></pre>
+</li>
+</ul>
+</li>
+</ul><h2>Methods</h2>
+
+<hr><ul>
+<li>resetDropzone() - Resets the dropzone </li>
+<li>resetInput() - Resets the file input</li>
+<li>resetQueue()- Resets the queue (i.e. clears the queue)</li>
+<li>resetPreview() - Resets/Clears the preview container</li>
+<li>reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())</li>
+<li>getQueue() - Gets the current contents of the queue</li>
+<li>send() - Manually sends the files in the queue</li>
+<li>showDzText() - shows the dropzone text </li>
+<li>hideDzText() - hides the dropzone text</li>
 </ul><h2>MIT License</h2>
 
 <hr><p>Copyright (c) 2012 Steve Ricciardelli</p>
@@ -298,7 +311,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">Upload Monkey maintained by <a href="https://github.com/stevericc">stevericc</a></p>
+        <p class="copyright">Upload Monkey maintained by <a href="https://github.com/sricc">sricc</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
