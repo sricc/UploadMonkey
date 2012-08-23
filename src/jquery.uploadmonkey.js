@@ -71,7 +71,7 @@
 				dropZoneText		: 'Drop files here...',
 				fileInput			: null,
 				preview				: null,
-				defaultTheme		: true,
+				defaultTheme		: false,
 				dropZoneTextSize	: '20px',
 				dzDragOverColor		: '#99CCFF',
 				dzDragLeaveColor	: '#FFF',
@@ -442,7 +442,7 @@
 			// Build dropzone
 			if (!reset) {
 				self.dropZone.find('span.dropzone-text').remove();
-				self.dropZone.append('<span></span>');
+				self.dropZone.append('<span class="dropzone-text"></span>');
 			}
 
 			// Initialize the default theme
