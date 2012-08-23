@@ -71,7 +71,7 @@
 				dropZoneText		: 'Drop files here...',
 				fileInput			: null,
 				preview				: null,
-				defaultTheme		: false,
+				defaultTheme		: true,
 				dropZoneTextSize	: '20px',
 				dzDragOverColor		: '#99CCFF',
 				dzDragLeaveColor	: '#FFF',
