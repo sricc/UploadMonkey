@@ -863,6 +863,9 @@
 			
 			// Open the request
 			xhr.open(self.options.method.toUpperCase(), self.options.action);
+
+			// Don't cache requests
+			xhr.setRequestHeader("Cache-Control", "no-cache");
 			
 			// Set headers if the method is PUT
 			if (self.options.method.toUpperCase() === 'PUT') {
