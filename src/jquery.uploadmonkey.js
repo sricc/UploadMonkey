@@ -979,8 +979,6 @@
 
 			if (self.dropZone)
 				self.dropZone.find('span.dropzone-text').html('Loading...');
-
-			_debug(self.dropZone.find('span.dropzone-text').html());
 			
 			// Send the request
 			(self.supportsFileUpload && !self.options.forceIframe)
