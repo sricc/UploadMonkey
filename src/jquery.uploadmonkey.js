@@ -442,9 +442,10 @@
 			// Build dropzone
 			if (!reset) {
 				self.dropZone.find('span.dropzone-text').remove();
-				self.dropZone.append('<span></span>');
+				self.dropZone.append('<span class="dropzone-text"></span>');
 			}
 
+			// Initialize the default theme
 			if (self.options.defaultTheme) {
 				self.dropZone
 					.css('text-align', 'center')
