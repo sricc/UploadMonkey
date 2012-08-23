@@ -172,6 +172,8 @@ Upload Monkey was designed to be as flexible as possible but still completely fu
 * reset() - Performs all resets (resetDropzone(), resetInput(), resetQueue(), and resetPreview())
 * getQueue() - Gets the current contents of the queue
 * send() - Manually sends the files in the queue
+* showDzText() - shows the dropzone text 
+* hideDzText() - hides the dropzone text
 		
 		
 ## MIT License

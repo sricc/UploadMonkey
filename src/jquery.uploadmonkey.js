@@ -457,7 +457,6 @@
 			if ( _checkFileApi() ) {
 				self.dropZone.find('span.dropzone-text')
 					.html(self.options.dropZoneText)
-					.addClass('dropzone-text')
 					.css('color','grey')
 					.css('top', '50%');
 	
@@ -967,6 +966,16 @@
 			_debug('Queue: ');
 			_debug(self.queue);
 		};
+
+		/**
+		 * Hide the dropzone text (i.e. <span class="dropzone-text">)
+		 */
+		self.hideDzText = function() {
+			self.dropZone.find('span.dropzone-text').hide();
+			
+			// Output debug info
+			_debug('Dropzone text removed');
+		};
 		
 		/**
 		 * Send the request
@@ -988,6 +997,16 @@
 			(self.supportsFileUpload && !self.options.forceIframe)
 				? _sendFileAjax()
 				: _sendFileIframe();
+		};
+
+		/**
+		 * Show the dropzone text (i.e. <span class="dropzone-text">)
+		 */
+		self.showDzText = function() {
+			self.dropZone.find('span.dropzone-text').show();
+			
+			// Output debug info
+			_debug('Dropzone text removed');
 		};
 		
 		// Initialize
