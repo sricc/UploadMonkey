@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
+    <link href="css/bootstrap.css" rel="stylesheet" >
+
     <title></title>
     
     <style type="text/css">
@@ -15,32 +17,38 @@
             width		 : 250px;
             height 		 : 150px; 	
         }
-		
     </style>
 </head>
 <body>
 
-<div id="dropzone" class="uploadable"></div>
+<!-- <a href="#myModal" id='showModal'>Show Modal</a> -->
 
-<input type="file" name='file' id="files" name="files[]" />
+<a href="#myModal" role="button" class="btn" data-toggle="modal">Launch demo modal</a>
 
-<div id="preview"></div>
+<div id="myModal" class="modal hide">
+	<div id="dropzone" class="uploadable"></div>
 
-<ul>
-	<li><a href='#' id='upload'>Upload</a></li>
-    <li><a href='#' id='getQueue'>Get Queue</a></li>
-    <li><a href='#' id='resetPreview'>Reset Preview</a></li>
-	<li><a href='#' id='resetQueue'>Reset Queue</a></li>
-	<li><a href='#' id='resetDropzone'>Reset Dropzone</a></li>
-    <li><a href='#' id='resetInput'>Reset Input</a></li>
-	<li><a href='#' id='reset'>Reset</a></li>
-</ul>
+	<input type="file" name='file' id="files" name="files[]" />
 
-<div id="list"></div>
+	<div id="preview"></div>
+
+	<ul>
+		<li><a href='#' id='upload'>Upload</a></li>
+		<li><a href='#' id='reset'>Reset</a></li>
+	    <li><a href='#' id='getQueue'>Get Queue</a></li>
+	    <li><a href='#' id='resetPreview'>Reset Preview</a></li>
+		<li><a href='#' id='resetQueue'>Reset Queue</a></li>
+		<li><a href='#' id='resetDropzone'>Reset Dropzone</a></li>
+	    <li><a href='#' id='resetInput'>Reset Input</a></li>
+	</ul>
+
+	<div id="list"></div>
+</div>
 
 <!--<div id="progress"><progress id="bar" max="100" value="0"></progress></div>-->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script> 
 <script src="../src/jquery.uploadmonkey.js" type="text/javascript"></script> 
 
 <!--[if IE]>
@@ -192,6 +200,13 @@
 			upload.getQueue()
 		});
 	
+		$('#showModal').on('click', function(e) {			
+			e.preventDefault();
+
+			console.log('show modal');
+			
+			$('#myModal').modal('show');
+		});
 	});
 	
 </script>
