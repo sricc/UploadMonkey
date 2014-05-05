@@ -465,9 +465,9 @@
 					// Add events
 					var xhr = new XMLHttpRequest();
 					if (xhr.upload) {
-						self.dropZone.live("dragover",	_dragOver);
-						self.dropZone.live("dragleave",	_dragLeave);
-						self.dropZone.live("drop",		_drop);
+						self.dropZone.on("dragover",	_dragOver);
+						self.dropZone.on("dragleave",	_dragLeave);
+						self.dropZone.on("drop",		_drop);
 					}
 				}
 			} else {
@@ -511,7 +511,7 @@
 			clonedInput = self.fileInput.outerHtml();
 		
 			// Bind on change event to the element if it's a form input
-			self.fileInput.live('change', function(e) {
+			self.fileInput.on('change', function(e) {
 				
 				// Check for IE
 				if ($.browser.msie) {
